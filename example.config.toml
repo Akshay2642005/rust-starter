@@ -1,6 +1,6 @@
 [primary]
 env = "production"
-name = "rust-tanstack-starter"
+name = "rust-starter"
 
 [server]
 host = "0.0.0.0"

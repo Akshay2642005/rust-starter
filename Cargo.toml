@@ -2,14 +2,26 @@
 name = "rust-starter"
 version = "0.1.0"
 edition = "2024"
+description = "A Rust starter template for building production ready backend services"
 
 # Define dependencies for the root package here.
 [dependencies]
+# Error Handling
+anyhow = { workspace = true }
+
+# Observability and Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Workspace Crates 
+configuration = { workspace = true }
 
 # internal crates can be added here as dependencies for the root package,
 [workspace]
 resolver = "3"
-members = []
+members = [
+    "crates/configuration",
+]
 
 # workspace package settings
 [workspace.package]
@@ -19,6 +31,52 @@ edition = "2024"
 # Workspace dependencies can be defined here and will be shared across all members of the workspace.
 [workspace.dependencies]
 
+# Error Handling
+anyhow = "1"
+thiserror = "1"
+
+# Configuration 
+arc-swap = "1.7.1"
+config = { version = "0.15.22", default-features = false, features = ["toml"] }
+dotenvy = "0.15"
+notify = "8.2.0"
+
+# Data Serialization and Deserialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Observability and Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3.20", features = ["chrono", "env-filter", "fmt","json"] }
+
+# Async Runtime and Utilities
+tokio = { version = "1.0", features = ["full"] }
+async-trait = "0.1"
+rand = "0.8"
+sha2 = "0.10"
+base64 = "0.22"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+argon2 = "0.5"
+
+# Database and ORM
+sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+
+# HTTP Libraries
+axum = { version = "0.8", features = ["macros", "tracing", "multipart", "ws"] }
+tower = { version = "0.5", features = ["full"] }
+tower-http = { version = "0.6", features = ["cors", "compression-gzip", "timeout", "trace", "request-id", "sensitive-headers", "catch-panic", "set-header", "limit"] }
+tower_governor = { version = "0.4", features = ["axum"] }
+governor = "0.6"
+
+# HTTP Utilities and Validation
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+validator = { version = "0.18", features = ["derive"] }
+utoipa = { version = "4", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-scalar = { version = "0.1", features = ["axum"] }
+
+# Member Crates
+configuration = { path = "crates/configuration"}
 
 
 # Profile settings for development and release builds. These settings can be overridden in individual member packages if needed.
