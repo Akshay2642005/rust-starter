@@ -1,0 +1,38 @@
+[package]
+name = "rust-starter"
+version = "0.1.0"
+edition = "2024"
+
+# Define dependencies for the root package here.
+[dependencies]
+
+# internal crates can be added here as dependencies for the root package,
+[workspace]
+resolver = "3"
+members = []
+
+# workspace package settings
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+# Workspace dependencies can be defined here and will be shared across all members of the workspace.
+[workspace.dependencies]
+
+
+
+# Profile settings for development and release builds. These settings can be overridden in individual member packages if needed.
+[profile.dev]
+opt-level = 0
+debug = true
+incremental = true
+
+[profile.dev.package."*"]
+opt-level = 1
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"

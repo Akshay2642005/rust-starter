@@ -1,0 +1,35 @@
+[primary]
+env = "production"
+name = "rust-tanstack-starter"
+
+[server]
+host = "0.0.0.0"
+port = 8080
+read_timeout_secs = 30
+write_timeout_secs = 30
+idle_timeout_secs = 60
+request_timeout_secs = 30
+max_body_size_bytes = 10485760
+cors_allowed_origins = ["http://localhost:3000", "http://localhost:5173"]
+static_dir = "public"
+path_prefix = "/api/v1"
+
+[database]
+url = "postgres://postgres:postgres@localhost:5432/rust_tanstack_starter"
+max_connections = 5
+min_connections = 1
+
+[auth]
+secret = "change-me-change-me-change-me-1234"
+base_url = "http://localhost:3000"
+path_prefix = "/auth"
+password_min_length = 8
+enable_signup = true
+
+[auth.argon2]
+memory_cost = 19456
+time_cost = 2
+parallelism = 1
+
+[features]
+include_runtime_details = true
