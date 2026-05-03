@@ -6,8 +6,6 @@ license.workspace = true
 description = "SeaOrm Integration Layer"
 
 [dependencies]
-seaorm-macros     = { workspace = true }
-seaorm-registry   = { workspace = true }
 configuration     = { workspace = true } 
 async-trait       = { workspace = true }
 sea-orm           = { workspace = true }
@@ -19,6 +17,5 @@ tracing           = { workspace = true }
 thiserror         = { workspace = true }
 uuid              = { workspace = true }
 chrono            = { workspace = true }
-
 
 

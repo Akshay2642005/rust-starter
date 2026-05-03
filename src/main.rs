@@ -1,8 +1,5 @@
 use configuration::ConfigManager;
-use seaorm::{AppSchema, SeaOrmStore};
-
-pub struct Schema;
-impl AppSchema for Schema {}
+use seaorm::SeaOrmStore;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -14,7 +11,7 @@ async fn main() -> anyhow::Result<()> {
     println!("Configuration: {:#?}", config);
     println!("Connecting to database at: {}", config.store.url);
 
-    let store = seaorm::SeaOrmStore::<Schema>::connect_and_migrate(&config).await?;
+    let store = SeaOrmStore::connect_and_migrate(&config).await?;
     SeaOrmStore::ping(&store).await?;
 
     Ok(())

@@ -1,8 +1,7 @@
-//! Lifecycle hooks for `SeaOrmStore`.
+//! Optional lifecycle hook traits for service-layer operations.
 //!
 //! Every method has a default no-op impl; implementors override only what they
-//! need.  Hooks are called in insertion order.  Returning `HookControl::Cancel`
-//! from a `before_*` hook aborts the operation with `OrmError::HookCancelled`.
+//! need. Service code decides where hooks are stored and when they run.
 //!
 //! # Example — audit log hook
 //!
@@ -10,9 +9,12 @@
 //! struct AuditHook { logger: Arc<AuditLogger> }
 //!
 //! #[async_trait]
-//! impl<M: SeaOrmModel> OrmHook<M> for AuditHook {
+//! impl<M> OrmHook<M> for AuditHook
+//! where
+//!     M: Send + Sync,
+//! {
 //!     async fn after_insert(&self, model: &M, _ctx: &HookCtx<'_>) -> OrmResult<()> {
-//!         self.logger.record("insert", model.id()).await?;
+//!         self.logger.record("insert").await?;
 //!         Ok(())
 //!     }
 //! }
@@ -22,7 +24,6 @@ use async_trait::async_trait;
 use sea_orm::{DatabaseConnection, DatabaseTransaction};
 
 use crate::error::OrmResult;
-use crate::schema::SeaOrmModel;
 use crate::types::{CreateFields, UpdateFields};
 
 /// Control flow returned by `before_*` hook methods.
@@ -46,11 +47,11 @@ pub struct HookCtx<'a> {
     pub tx: Option<&'a DatabaseTransaction>,
 }
 
-/// Generic lifecycle hook for any `SeaOrmModel`.
+/// Generic lifecycle hook for service or repository operations.
 ///
-/// `M` is the concrete entity model (e.g. `workspace::Model`).
+/// `M` is typically a generated SeaORM model (e.g. `workspace::Model`).
 #[async_trait]
-pub trait OrmHook<M: SeaOrmModel>: Send + Sync {
+pub trait OrmHook<M: Send + Sync>: Send + Sync {
     async fn before_insert(
         &self,
         create: &mut CreateFields,

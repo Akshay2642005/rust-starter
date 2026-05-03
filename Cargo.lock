@@ -2041,8 +2041,6 @@ dependencies = [
  "configuration",
  "sea-orm",
  "sea-orm-migration",
- "seaorm-macros",
- "seaorm-registry",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
@@ -2050,21 +2048,6 @@ dependencies = [
  "tracing",
  "uuid",
 ]
-
-[[package]]
-name = "seaorm-macros"
-version = "0.1.0"
-dependencies = [
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "seaorm-registry",
- "syn 2.0.117",
-]
-
-[[package]]
-name = "seaorm-registry"
-version = "0.1.0"
 
 [[package]]
 name = "semver"

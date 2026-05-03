@@ -16,29 +16,26 @@ use std::time::Duration;
 use tracing::info;
 
 use crate::error::{OrmResult, map_db_err};
-use crate::schema::AppSchema;
 
-/// The central store, generic over the application's `AppSchema` `S`.
+/// The central database store.
 ///
 /// `Clone` is cheap — `DatabaseConnection` holds an `Arc` internally.
 ///
 /// # Construction
 ///
 /// ```rust,ignore
-/// let store = SeaOrmStore::<MySchema>::connect_and_migrate(&cfg).await?;
+/// let store = SeaOrmStore::connect_and_migrate(&cfg).await?;
 /// ```
 #[derive(Clone)]
-pub struct SeaOrmStore<S: AppSchema> {
+pub struct SeaOrmStore {
     db: DatabaseConnection,
-    // S is held for future extension (e.g. schema-specific middleware).
-    _schema: std::marker::PhantomData<S>,
 }
 
-impl<S: AppSchema> SeaOrmStore<S> {
+impl SeaOrmStore {
     /// Connect to Postgres and run pending migrations.
     pub async fn connect_and_migrate(cfg: &Config) -> OrmResult<Self> {
-        use migrator::AppMigrator;
-        use sea_orm_migration::MigratorTrait;
+        // use migrator::AppMigrator;
+        // use sea_orm_migration::MigratorTrait;
 
         let mut opts = ConnectOptions::new(&cfg.store.url);
         opts.max_connections(cfg.store.max_connections)
@@ -52,14 +49,11 @@ impl<S: AppSchema> SeaOrmStore<S> {
         info!("connecting to postgres…");
         let db = Database::connect(opts).await.map_err(map_db_err)?;
 
-        info!("running pending migrations…");
-        AppMigrator::up(&db, None).await.map_err(map_db_err)?;
+        // info!("running pending migrations…");
+        // AppMigrator::up(&db, None).await.map_err(map_db_err)?;
 
         info!("store ready");
-        Ok(Self {
-            db,
-            _schema: std::marker::PhantomData,
-        })
+        Ok(Self { db })
     }
 
     pub fn db(&self) -> &DatabaseConnection {

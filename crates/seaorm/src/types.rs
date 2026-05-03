@@ -1,37 +1,25 @@
 //! Shared create/update/pagination types for the store layer.
 //!
-//! `CreateFields` and `UpdateFields` carry only the plugin-level fields
-//! that `#[derive(OrmEntity)]` knows about.  Every entity repository defines
-//! its own `CreateXxx` / `UpdateXxx` DTOs on top of these.
+//! `CreateFields` and `UpdateFields` are optional service-layer carriers.
+//! Generated SeaORM entities remain the database source of truth.
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-// ── Plugin-level create/update carriers ───────────────────────────────────────
-
-/// Plugin fields used by `SeaOrmModel::new_active`.
-/// Entity repositories wrap this inside their own `CreateXxx` DTO.
+/// Optional shared fields for service-level create DTOs.
 #[derive(Debug, Default, Clone)]
 pub struct CreateFields {
-    // Plugin: metadata
     pub metadata: Option<serde_json::Value>,
-    // Plugin: slug
     pub slug: Option<String>,
 }
 
-/// Plugin fields used by `SeaOrmModel::stamp_updated_at`.
-/// Entity repositories wrap this inside their own `UpdateXxx` DTO.
+/// Optional shared fields for service-level update DTOs.
 #[derive(Debug, Default, Clone)]
 pub struct UpdateFields {
-    // Plugin: soft-delete
     pub deleted_at: Option<DateTime<Utc>>,
-    // Plugin: metadata
     pub metadata: Option<serde_json::Value>,
-    // Plugin: slug
     pub slug: Option<String>,
 }
-
-// ── Pagination ────────────────────────────────────────────────────────────────
 
 /// Page cursor for list queries.
 #[derive(Debug, Clone, Deserialize)]

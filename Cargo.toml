@@ -26,8 +26,6 @@ seaorm = { workspace = true }
 resolver = "3"
 members = [
     "crates/configuration",
-    "crates/seaorm-macros",
-    "crates/seaorm-registry",
     "crates/seaorm",
 ]
 
@@ -89,17 +87,9 @@ validator = { version = "0.18", features = ["derive"] }
 utoipa = { version = "4", features = ["axum_extras", "chrono", "uuid"] }
 utoipa-scalar = { version = "0.1", features = ["axum"] }
 
-# Proc-macro Utilities
-proc-macro2      = "1"
-quote            = "1"
-syn              = { version = "2", features = ["full"] }
-proc-macro-crate = "3"
-
 # Member Crates
 configuration = { path = "crates/configuration"}
 seaorm = { path = "crates/seaorm" }
-seaorm-macros = { path = "crates/seaorm-macros" }
-seaorm-registry = { path = "crates/seaorm-registry" }
 
 
 
