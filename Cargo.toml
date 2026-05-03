@@ -2,6 +2,7 @@
 name = "rust-starter"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 description = "A Rust starter template for building production ready backend services"
 
 # Define dependencies for the root package here.
@@ -21,12 +22,28 @@ configuration = { workspace = true }
 resolver = "3"
 members = [
     "crates/configuration",
+    "crates/seaorm-macros",
+    "crates/seaorm-registry",
+    "crates/seaorm",
 ]
 
-# workspace package settings
+# Workspace package settings
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+
+
+# Workspace linting rules
+[workspace.lints.rust]
+unused_imports        = "warn"
+dead_code             = "warn"
+unused_must_use       = "deny"
+ 
+[workspace.lints.clippy]
+all      = "warn"
+pedantic = "warn"
+unwrap_used = "deny"
 
 # Workspace dependencies can be defined here and will be shared across all members of the workspace.
 [workspace.dependencies]
@@ -60,7 +77,10 @@ chrono = { version = "0.4", features = ["serde"] }
 argon2 = "0.5"
 
 # Database and ORM
-sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+sea-orm           = { version = "1", features = [ "sqlx-postgres", "runtime-tokio-rustls", "macros", "with-chrono", "with-json", "with-uuid"] }
+sea-orm-migration = { version = "1", features = [ "sqlx-postgres", "runtime-tokio-rustls" ] }
+
+# sqlx = { version = "0.8.6", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
 
 # HTTP Libraries
 axum = { version = "0.8", features = ["macros", "tracing", "multipart", "ws"] }
@@ -75,8 +95,18 @@ validator = { version = "0.18", features = ["derive"] }
 utoipa = { version = "4", features = ["axum_extras", "chrono", "uuid"] }
 utoipa-scalar = { version = "0.1", features = ["axum"] }
 
+# Proc-macro Utilities
+proc-macro2      = "1"
+quote            = "1"
+syn              = { version = "2", features = ["full"] }
+proc-macro-crate = "3"
+
 # Member Crates
 configuration = { path = "crates/configuration"}
+seaorm = { path = "crates/seaorm" }
+seaorm-macros = { path = "crates/seaorm-macros" }
+seaorm-registry = { path = "crates/seaorm-registry" }
+
 
 
 # Profile settings for development and release builds. These settings can be overridden in individual member packages if needed.

@@ -1,0 +1,24 @@
+[package]
+name = "seaorm"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+description = "SeaOrm Integration Layer"
+
+[dependencies]
+seaorm-macros   = { workspace = true }
+seaorm-registry = { workspace = true }
+ 
+async-trait    = { workspace = true }
+sea-orm        = { workspace = true }
+sea-orm-migration = { workspace = true }
+serde          = { workspace = true }
+serde_json     = { workspace = true }
+tokio          = { workspace = true }
+tracing        = { workspace = true }
+thiserror      = { workspace = true }
+uuid           = { workspace = true }
+chrono         = { workspace = true }
+
+
+

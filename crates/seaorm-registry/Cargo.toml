@@ -1,0 +1,7 @@
+[package]
+name = "seaorm-registry"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+description = "A registry for SeaORM, a Rust ORM and query builder for SQL databases."
+
