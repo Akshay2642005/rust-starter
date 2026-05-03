@@ -1,10 +1,21 @@
-#![allow(unused)]
-extern crate self as orm;
+extern crate self as seaorm;
 
-mod error;
-mod hooks;
-mod schema;
-mod store;
-mod types;
+pub mod error;
+pub mod hooks;
+pub mod schema;
+pub mod store;
+pub mod types;
 
-pub use error::{OrmError, OrmResult, cancelled_by_hook};
+// Re-export the proc macro so consumers only need one dependency.
+pub use seaorm_macros::OrmEntity;
+
+// Re-export sea-orm so the derive macro can use `crate::sea_orm::*`.
+pub use sea_orm;
+pub use sea_orm::{Database, DatabaseConnection};
+
+// Top-level convenience re-exports.
+pub use error::{OrmError, OrmResult};
+pub use hooks::{HookControl, HookCtx, OrmHook};
+pub use schema::{AppSchema, OrmEntity, SeaOrmModel};
+pub use store::SeaOrmStore;
+pub use store::repository::Repository;

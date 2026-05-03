@@ -1768,6 +1768,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "configuration",
+ "seaorm",
+ "tokio",
  "tracing",
  "tracing-subscriber",
 ]
@@ -2036,6 +2038,7 @@ version = "0.1.0"
 dependencies = [
  "async-trait",
  "chrono",
+ "configuration",
  "sea-orm",
  "sea-orm-migration",
  "seaorm-macros",

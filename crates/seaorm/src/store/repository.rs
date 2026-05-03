@@ -18,13 +18,13 @@ use std::sync::Arc;
 
 use chrono::Utc;
 use sea_orm::{
-    ActiveModelTrait, ColumnTrait, ConnectionTrait, DatabaseConnection, DatabaseTransaction,
-    EntityTrait, IntoActiveModel, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, Set,
+    ActiveModelTrait, ColumnTrait, DatabaseConnection, DatabaseTransaction, EntityTrait,
+    PaginatorTrait, QueryFilter, QueryOrder,
 };
 use uuid::Uuid;
 
 use crate::error::{OrmError, OrmResult, cancelled_by_hook, map_db_err};
-use crate::hooks::{HookControl, HookCtx, OrmHook};
+use crate::hooks::{HookCtx, OrmHook};
 use crate::schema::SeaOrmModel;
 use crate::types::{CreateFields, Page, Paginated, UpdateFields};
 

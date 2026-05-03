@@ -14,8 +14,12 @@ anyhow = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 
+# Async
+tokio = { workspace = true }
+
 # Workspace Crates 
 configuration = { workspace = true }
+seaorm = { workspace = true }
 
 # internal crates can be added here as dependencies for the root package,
 [workspace]
@@ -34,16 +38,6 @@ edition = "2024"
 license = "MIT"
 
 
-# Workspace linting rules
-[workspace.lints.rust]
-unused_imports        = "warn"
-dead_code             = "warn"
-unused_must_use       = "deny"
- 
-[workspace.lints.clippy]
-all      = "warn"
-pedantic = "warn"
-unwrap_used = "deny"
 
 # Workspace dependencies can be defined here and will be shared across all members of the workspace.
 [workspace.dependencies]
