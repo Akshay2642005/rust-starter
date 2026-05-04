@@ -22,6 +22,10 @@ configuration = { workspace = true }
 seaorm = { workspace = true }
 
 # internal crates can be added here as dependencies for the root package,
+
+[dev-dependencies]
+sea-orm = { workspace = true, features = ["mock"] }
+
 [workspace]
 resolver = "3"
 members = [

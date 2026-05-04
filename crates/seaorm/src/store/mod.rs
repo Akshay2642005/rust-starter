@@ -5,21 +5,20 @@ pub mod migrations;
 pub mod migrator;
 pub mod repository;
 
-// Example entity — shows how to wire up a real domain entity.
-
 use configuration::Config;
 
 use sea_orm::{
     ConnectOptions, Database, DatabaseConnection, DatabaseTransaction, DbErr, TransactionTrait,
 };
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
 use tracing::info;
 
 use crate::error::{OrmResult, map_db_err};
+use crate::store::repository::Repository;
 
 /// The central database store.
 ///
-/// `Clone` is cheap — `DatabaseConnection` holds an `Arc` internally.
+/// `Clone` is cheap because the connection is stored behind an `Arc`.
 ///
 /// # Construction
 ///
@@ -28,14 +27,14 @@ use crate::error::{OrmResult, map_db_err};
 /// ```
 #[derive(Clone)]
 pub struct SeaOrmStore {
-    db: DatabaseConnection,
+    db: Arc<DatabaseConnection>,
 }
 
 impl SeaOrmStore {
     /// Connect to Postgres and run pending migrations.
     pub async fn connect_and_migrate(cfg: &Config) -> OrmResult<Self> {
-        // use migrator::AppMigrator;
-        // use sea_orm_migration::MigratorTrait;
+        use migrator::AppMigrator;
+        use sea_orm_migration::MigratorTrait;
 
         let mut opts = ConnectOptions::new(&cfg.store.url);
         opts.max_connections(cfg.store.max_connections)
@@ -49,20 +48,29 @@ impl SeaOrmStore {
         info!("connecting to postgres…");
         let db = Database::connect(opts).await.map_err(map_db_err)?;
 
-        // info!("running pending migrations…");
-        // AppMigrator::up(&db, None).await.map_err(map_db_err)?;
+        info!("running pending migrations…");
+        AppMigrator::up(&db, None).await.map_err(map_db_err)?;
 
         info!("store ready");
-        Ok(Self { db })
+        Ok(Self { db: Arc::new(db) })
     }
 
     pub fn db(&self) -> &DatabaseConnection {
-        &self.db
+        self.db.as_ref()
+    }
+
+    /// Build a typed repository for a generated SeaORM entity.
+    pub fn repository<E>(&self) -> Repository<E>
+    where
+        E: sea_orm::EntityTrait,
+        E::Model: Send + Sync,
+    {
+        Repository::from_shared(Arc::clone(&self.db))
     }
 
     /// Liveness / readiness check.
     pub async fn ping(&self) -> Result<(), DbErr> {
-        self.db.ping().await
+        self.db.as_ref().ping().await
     }
 
     /// Execute `work` inside a single ACID transaction.
@@ -84,7 +92,7 @@ impl SeaOrmStore {
             > + Send,
         R: Send,
     {
-        let tx = self.db.begin().await.map_err(map_db_err)?;
+        let tx = self.db.as_ref().begin().await.map_err(map_db_err)?;
         match work(&tx).await {
             Ok(v) => {
                 tx.commit().await.map_err(map_db_err)?;

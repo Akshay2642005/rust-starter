@@ -1,0 +1,53 @@
+[config]
+default_to_workspace = false
+
+[tasks.api]
+description = "Run backend app"
+command = "cargo"
+args = ["watch","-q","-c","-x","run -p api"]
+env = { APP_ENV = "production", RUST_LOG = "info,tower_http=trace" }
+
+[tasks.client]
+description = "Run frontend placeholder"
+cwd = "apps/client"
+command = "pnpm.cmd"
+args = ["dev"]
+
+[tasks.up]
+description = "Start local infra"
+command = "docker"
+args = ["compose", "-f", "infra/docker-compose.yml", "up", "-d"]
+
+[tasks.down]
+description = "Stop local infra"
+command = "docker"
+args = ["compose", "-f", "infra/docker-compose.yml", "down"]
+
+[tasks.logs]
+description = "Tail local infra logs"
+command = "docker"
+args = ["compose", "-f", "infra/docker-compose.yml", "logs", "-f"]
+
+[tasks.deny]
+command = "cargo"
+args = ["deny", "check"]
+
+[tasks.check]
+description = "Run formatting and lint checks"
+run_task = { name = ["fmt-check", "clippy", "deny"] }
+
+[tasks.fmt-check]
+command = "cargo"
+args = ["fmt", "--all", "--check"]
+
+[tasks.clippy]
+command = "cargo"
+args = ["clippy", "--workspace", "--all-targets", "--", "-D", "warnings"]
+
+[tasks.test]
+command = "cargo"
+args = ["test", "--workspace"]
+
+[tasks.ci]
+description = "Local CI flow"
+run_task = { name = ["check", "test"] }

@@ -16,7 +16,7 @@
 use sea_orm::sea_query::IntoIden;
 use sea_orm_migration::prelude::*;
 
-use crate::store::migrations;
+// use crate::store::migrations;
 
 // Import concrete migration structs here as you add them.
 // mod m20240101_000001_create_workspaces;
@@ -28,7 +28,7 @@ impl MigratorTrait for AppMigrator {
     fn migrations() -> Vec<Box<dyn MigrationTrait>> {
         vec![
             // Add new migrations here in order.
-            Box::new(migrations::m20260503_170604_create_table::Migration),
+            // Box::new(migrations::m20260503_170604_create_table::Migration),
         ]
     }
 

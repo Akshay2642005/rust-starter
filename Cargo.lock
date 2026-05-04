@@ -1768,6 +1768,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "configuration",
+ "sea-orm",
  "seaorm",
  "tokio",
  "tracing",
