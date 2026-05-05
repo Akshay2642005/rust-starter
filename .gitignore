@@ -64,3 +64,4 @@ tsconfig.tsbuildinfo
 **/target
 **/.zed/
 **/config/
+**/*.txt
