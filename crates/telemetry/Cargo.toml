@@ -7,4 +7,7 @@ description = "Telemetry and logging utilities for the Rust Starter template"
 
 [dependencies]
 # tracing
+serde = { workspace = true }
+tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+configuration = { workspace = true }
