@@ -4,6 +4,7 @@ pub(crate) fn validate_configuration(config: &crate::schema::Config) -> anyhow::
     */
     ensure_not_blank(&config.primary.env, "primary.env")?;
     ensure_not_blank(&config.primary.name, "primary.name")?;
+    ensure_not_blank(&config.store.url, "store.url")?;
     Ok(())
 }
 

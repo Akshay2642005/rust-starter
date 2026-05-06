@@ -13,5 +13,5 @@ mod watcher;
 
 pub(crate) use handle::ConfigHandle;
 pub use loader::load_config;
-pub use schema::{Config, PrimaryConfig};
+pub use schema::{Config, LogFormat, PrimaryConfig};
 pub use watcher::ConfigManager;
