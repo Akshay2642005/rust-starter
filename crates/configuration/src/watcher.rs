@@ -88,7 +88,7 @@ impl ConfigManager {
 
 fn new_watcher(tx: mpsc::UnboundedSender<()>) -> notify::Result<RecommendedWatcher> {
     notify::recommended_watcher(move |result: notify::Result<notify::Event>| match result {
-        Ok(event) if is_relevant_event(&event.kind) && touches_toml(&event.paths) => {
+        Ok(event) if is_relevant_event(&event.kind) && touches_config_file(&event.paths) => {
             let _ = tx.send(());
         }
         Ok(_) => {}
@@ -105,8 +105,10 @@ fn is_relevant_event(kind: &EventKind) -> bool {
     )
 }
 
-fn touches_toml(paths: &[PathBuf]) -> bool {
-    paths
-        .iter()
-        .any(|path| path.extension().is_some_and(|ext| ext == "toml"))
+fn touches_config_file(paths: &[PathBuf]) -> bool {
+    paths.iter().any(|path| {
+        path.extension()
+            .and_then(|ext| ext.to_str())
+            .is_some_and(|ext| matches!(ext, "toml" | "yml" | "yaml"))
+    })
 }
