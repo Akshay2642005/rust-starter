@@ -25,6 +25,7 @@ tokio = { workspace = true }
 # Workspace Crates 
 configuration = { workspace = true }
 seaorm = { workspace = true }
+telemetry = { workspace = true }
 
 # internal crates can be added here as dependencies for the root package,
 
@@ -36,6 +37,7 @@ resolver = "3"
 members = [
     "crates/configuration",
     "crates/seaorm",
+    "crates/telemetry",
 ]
 
 # Workspace package settings
@@ -99,7 +101,7 @@ utoipa-scalar = { version = "0.1", features = ["axum"] }
 # Member Crates
 configuration = { path = "crates/configuration"}
 seaorm = { path = "crates/seaorm" }
-
+telemetry = { path = "crates/telemetry" }
 
 
 # Profile settings for development and release builds. These settings can be overridden in individual member packages if needed.

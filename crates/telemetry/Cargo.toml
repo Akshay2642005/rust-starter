@@ -1,0 +1,10 @@
+[package]
+name = "telemetry"
+edition = "2024"
+version.workspace = true
+license.workspace = true
+description = "Telemetry and logging utilities for the Rust Starter template"
+
+[dependencies]
+# tracing
+tracing-subscriber = { workspace = true }

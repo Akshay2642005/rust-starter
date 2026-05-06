@@ -1,0 +1,13 @@
+primary:
+  env: development
+  name: rust-starter
+
+store:
+  url: postgres://postgres:postgres@localhost:15432/rust_starter
+  max_connections: 5
+  min_connections: 1
+  connect_timeout_secs: 30
+  acquire_timeout_secs: 30
+  idle_timeout_secs: 30
+  max_lifetime_secs: 1800
+  sqlx_logging: false
