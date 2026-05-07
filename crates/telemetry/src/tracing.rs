@@ -2,6 +2,9 @@ use std::sync::Arc;
 
 use crate::error::TraceInitError;
 use configuration::{Config, LogFormat};
+use tracing_error::ErrorLayer;
+
+use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::{EnvFilter, Layer, fmt, prelude::*};
 
 pub fn init_tracing(config: Arc<Config>) -> Result<(), TraceInitError> {
@@ -12,6 +15,7 @@ pub fn init_tracing(config: Arc<Config>) -> Result<(), TraceInitError> {
         LogFormat::Compact => {
             let layer = base_fmt_layer(&config).compact().with_filter(filter);
             tracing_subscriber::registry()
+                .with(ErrorLayer::default())
                 .with(layer)
                 .try_init()
                 .map_err(TraceInitError::InstallSubscriber)
@@ -19,6 +23,7 @@ pub fn init_tracing(config: Arc<Config>) -> Result<(), TraceInitError> {
         LogFormat::Pretty => {
             let layer = base_fmt_layer(&config).pretty().with_filter(filter);
             tracing_subscriber::registry()
+                .with(ErrorLayer::default())
                 .with(layer)
                 .try_init()
                 .map_err(TraceInitError::InstallSubscriber)
@@ -32,6 +37,7 @@ pub fn init_tracing(config: Arc<Config>) -> Result<(), TraceInitError> {
                 .with_filter(filter);
 
             tracing_subscriber::registry()
+                .with(ErrorLayer::default())
                 .with(layer)
                 .try_init()
                 .map_err(TraceInitError::InstallSubscriber)
@@ -61,4 +67,5 @@ where
         .with_target(true)
         .with_file(c.telemetry.include_file)
         .with_line_number(c.telemetry.include_line_number)
+        .with_span_events(FmtSpan::CLOSE)
 }

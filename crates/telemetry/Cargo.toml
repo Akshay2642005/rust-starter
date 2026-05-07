@@ -8,6 +8,9 @@ description = "Telemetry and logging utilities for the Rust Starter template"
 [dependencies]
 # tracing
 serde = { workspace = true }
+log = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+tracing-error = { workspace = true }
+tracing-log = { workspace = true }
 configuration = { workspace = true }

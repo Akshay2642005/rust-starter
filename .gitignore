@@ -65,3 +65,4 @@ tsconfig.tsbuildinfo
 **/.zed/
 **/config/
 **/*.txt
+**/ref
