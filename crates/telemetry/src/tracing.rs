@@ -8,6 +8,7 @@ use opentelemetry_sdk::Resource;
 use tracing::Subscriber;
 use tracing_error::ErrorLayer;
 use tracing_subscriber::fmt::format::FmtSpan;
+use tracing_subscriber::fmt::time::ChronoUtc;
 use tracing_subscriber::{EnvFilter, Layer, fmt, prelude::*};
 
 pub struct TelemetryGuard;
@@ -94,10 +95,21 @@ where
     S: tracing::Subscriber + for<'span> tracing_subscriber::registry::LookupSpan<'span>,
 {
     match &c.telemetry.format {
-        LogFormat::Compact => base_fmt_layer(c).compact().with_filter(filter).boxed(),
-        LogFormat::Pretty => base_fmt_layer(c).pretty().with_filter(filter).boxed(),
+        LogFormat::Compact => base_fmt_layer(c)
+            .compact()
+            .with_timer(ChronoUtc::new("%Y-%m-%d %H:%M:%S%.3f".to_string()))
+            .with_filter(filter)
+            .boxed(),
+
+        LogFormat::Pretty => base_fmt_layer(c)
+            .pretty()
+            .with_timer(ChronoUtc::new("%Y-%m-%d %H:%M:%S%.3f".to_string()))
+            .with_filter(filter)
+            .boxed(),
+
         LogFormat::Json => base_fmt_layer(c)
             .json()
+            .with_timer(ChronoUtc::rfc_3339())
             .flatten_event(true)
             .with_current_span(true)
             .with_span_list(true)
@@ -113,7 +125,7 @@ where
 {
     fmt::layer()
         .with_ansi(c.telemetry.ansi)
-        .with_target(true)
+        .with_target(false)
         .with_file(c.telemetry.include_file)
         .with_line_number(c.telemetry.include_line_number)
         .with_span_events(FmtSpan::CLOSE)
