@@ -133,7 +133,6 @@ where
 
 impl Drop for TelemetryGuard {
     fn drop(&mut self) {
-        tracing::info!("telemetry shutting down");
         opentelemetry::global::shutdown_tracer_provider();
     }
 }

@@ -28,6 +28,10 @@ pub struct ServerConfig {
     pub idle_timeout_secs: u64,
     #[serde(default = "default_request_timeout_secs")]
     pub request_timeout_secs: u64,
+    #[serde(default = "default_shutdown_timeout_secs")]
+    pub shutdown_timeout_secs: u64,
+    #[serde(default = "default_min_graceful_shutdown_secs")]
+    pub min_graceful_shutdown_secs: u64,
     #[serde(default = "default_max_body_size_bytes")]
     pub max_body_size_bytes: usize,
     pub cors_allowed_origins: Vec<String>,
@@ -152,6 +156,15 @@ fn default_idle_timeout_secs() -> u64 {
 fn default_request_timeout_secs() -> u64 {
     15
 }
+
+fn default_shutdown_timeout_secs() -> u64 {
+    30
+}
+
+fn default_min_graceful_shutdown_secs() -> u64 {
+    0
+}
+
 fn default_max_body_size_bytes() -> usize {
     10 * 1024 * 1024 // 10 MB
 }

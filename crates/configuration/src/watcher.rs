@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use notify::{EventKind, RecommendedWatcher, RecursiveMode, Watcher};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
-use tokio::sync::mpsc;
+use tokio::sync::{broadcast, mpsc};
 use tokio::task::JoinHandle;
 
 pub struct ConfigManager {
@@ -37,7 +37,7 @@ impl ConfigManager {
         load_config(&self.env_name, &self.config_dir)
     }
 
-    pub fn spawn_watcher(&self) -> JoinHandle<()> {
+    pub fn spawn_watcher(&self, mut shutdown: broadcast::Receiver<()>) -> JoinHandle<()> {
         let env_name = self.env_name.clone();
         let config_dir = self.config_dir.clone();
         let handle = self.handle.clone();
@@ -64,21 +64,32 @@ impl ConfigManager {
 
             tracing::info!(path = %config_dir.display(), "config watcher started");
 
-            while rx.recv().await.is_some() {
-                tokio::time::sleep(Duration::from_millis(250)).await;
-
-                while rx.try_recv().is_ok() {}
-
-                match load_config(&env_name, &config_dir) {
-                    Ok(next) => {
-                        handle.swap(next);
-                        tracing::info!("configuration reloaded");
+            loop {
+                tokio::select! {
+                    _ = shutdown.recv() => {
+                        break;
                     }
-                    Err(error) => {
-                        tracing::error!(
-                            %error,
-                            "configuration reload failed; keeping last known good config"
-                        );
+                    event = rx.recv() => {
+                        if event.is_none() {
+                            break;
+                        }
+
+                        tokio::time::sleep(Duration::from_millis(250)).await;
+
+                        while rx.try_recv().is_ok() {}
+
+                        match load_config(&env_name, &config_dir) {
+                            Ok(next) => {
+                                handle.swap(next);
+                                tracing::info!("configuration reloaded");
+                            }
+                            Err(error) => {
+                                tracing::error!(
+                                    %error,
+                                    "configuration reload failed; keeping last known good config"
+                                );
+                            }
+                        }
                     }
                 }
             }

@@ -21,7 +21,7 @@ use crate::store::repository::Repository;
 /// # Construction
 ///
 /// ```rust,ignore
-/// let store = SeaOrmStore::connect_and_migrate(&cfg).await?;
+/// let store = SeaOrmStore::connect(&cfg).await?;
 /// ```
 #[derive(Clone)]
 pub struct SeaOrmStore {
@@ -30,7 +30,7 @@ pub struct SeaOrmStore {
 
 impl SeaOrmStore {
     /// Connect to Postgres and run pending migrations.
-    pub async fn connect_and_migrate(cfg: &Config) -> OrmResult<Self> {
+    pub async fn connect(cfg: &Config) -> OrmResult<Self> {
         let mut opts = ConnectOptions::new(&cfg.store.url);
         opts.max_connections(cfg.store.max_connections)
             .min_connections(cfg.store.min_connections)
@@ -64,6 +64,16 @@ impl SeaOrmStore {
     /// Liveness / readiness check.
     pub async fn ping(&self) -> Result<(), DbErr> {
         self.db.as_ref().ping().await
+    }
+
+    /// Gracefully close the database connection pool.
+    pub async fn close(self) -> OrmResult<()> {
+        match Arc::try_unwrap(self.db) {
+            Ok(db) => db.close().await.map_err(map_db_err),
+            Err(_) => Err(crate::error::OrmError::Database(
+                "database connection is still in use".to_string(),
+            )),
+        }
     }
 
     /// Execute `work` inside a single ACID transaction.

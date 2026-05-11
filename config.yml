@@ -1,35 +1,37 @@
 primary:
-  env: development
-  name: rust-starter
+    env: development
+    name: rust-starter
 
 server:
-  host: 0.0.0.0
-  port: 8080
-  read_timeout_secs: 30
-  write_timeout_secs: 30
-  idle_timeout_secs: 50
-  request_timeout_secs: 300
-  cors_allowed_origins: ["http://localhost:3000"]
-  path_prefix: "/api/v1"
+    host: 0.0.0.0
+    port: 8080
+    read_timeout_secs: 30
+    write_timeout_secs: 30
+    idle_timeout_secs: 50
+    request_timeout_secs: 300
+    shutdown_timeout_secs: 30
+    min_graceful_shutdown_secs: 5
+    cors_allowed_origins: ["http://localhost:3000"]
+    path_prefix: "/api/v1"
 
 telemetry:
-  service_name: rust-starter
-  environment: development
-  filter: info,tower_http=warn,rust_starter=trace
-  format: compact
-  ansi: true
-  include_file: false
-  include_line_number: false
-  otlp:
-    enabled: true
-    endpoint: "http://localhost:4317"
+    service_name: rust-starter
+    environment: development
+    filter: info,tower_http=warn,rust_starter=trace
+    format: compact
+    ansi: true
+    include_file: false
+    include_line_number: false
+    otlp:
+        enabled: true
+        endpoint: "http://localhost:4317"
 
 store:
-  url: postgres://postgres:postgres@localhost:5432/rust_starter
-  max_connections: 5
-  min_connections: 1
-  connect_timeout_secs: 30
-  acquire_timeout_secs: 30
-  idle_timeout_secs: 30
-  max_lifetime_secs: 1800
-  sqlx_logging: true
+    url: postgres://postgres:postgres@localhost:5432/rust_starter
+    max_connections: 4
+    min_connections: 1
+    connect_timeout_secs: 30
+    acquire_timeout_secs: 30
+    idle_timeout_secs: 30
+    max_lifetime_secs: 1800
+    sqlx_logging: true
