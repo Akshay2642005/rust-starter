@@ -6,6 +6,7 @@ pub struct Config {
     pub store: DatabaseConfig,
     pub server: ServerConfig,
     pub telemetry: TelemetryConfig,
+    pub auth: AuthConfig,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -48,6 +49,29 @@ pub struct DatabaseConfig {
     pub idle_timeout_secs: u64,
     pub max_lifetime_secs: u64,
     pub sqlx_logging: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AuthConfig {
+    pub secret: String,
+    pub base_url: String,
+    pub path_prefix: String,
+    #[serde(default = "default_enable_signup")]
+    pub enable_signup: bool,
+    #[serde(default = "default_password_min_length")]
+    pub password_min_length: u8,
+    #[serde(default)]
+    pub argon2: AuthArgon2Config,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct AuthArgon2Config {
+    #[serde(default = "default_argon2_memory_cost")]
+    pub memory_cost: u32,
+    #[serde(default = "default_argon2_time_cost")]
+    pub time_cost: u32,
+    #[serde(default = "default_argon2_parallelism")]
+    pub parallelism: u32,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -112,6 +136,16 @@ impl Default for OtlpConfig {
     }
 }
 
+impl Default for AuthArgon2Config {
+    fn default() -> Self {
+        Self {
+            memory_cost: default_argon2_memory_cost(),
+            time_cost: default_argon2_time_cost(),
+            parallelism: default_argon2_parallelism(),
+        }
+    }
+}
+
 fn default_service_name() -> String {
     "app".to_owned()
 }
@@ -167,4 +201,24 @@ fn default_min_graceful_shutdown_secs() -> u64 {
 
 fn default_max_body_size_bytes() -> usize {
     10 * 1024 * 1024 // 10 MB
+}
+
+fn default_enable_signup() -> bool {
+    true
+}
+
+fn default_password_min_length() -> u8 {
+    8
+}
+
+fn default_argon2_memory_cost() -> u32 {
+    19_456
+}
+
+fn default_argon2_time_cost() -> u32 {
+    2
+}
+
+fn default_argon2_parallelism() -> u32 {
+    1
 }

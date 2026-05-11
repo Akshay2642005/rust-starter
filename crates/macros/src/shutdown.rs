@@ -55,6 +55,8 @@ pub fn expand(item: TokenStream) -> TokenStream {
                     _ = terminate.recv() => {},
                     _ = interrupt.recv() => {},
                 }
+
+                tracing::info!("shutdown signal received");
             }
 
             #[cfg(not(unix))]
@@ -62,6 +64,8 @@ pub fn expand(item: TokenStream) -> TokenStream {
                 if let Err(error) = tokio::signal::ctrl_c().await {
                     tracing::error!(error = %error, "failed to listen for shutdown signal");
                 }
+
+                tracing::info!("shutdown signal received");
             }
         }
     }

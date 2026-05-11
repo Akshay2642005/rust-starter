@@ -65,8 +65,9 @@ fn expand_inner(args: RouteArgs, item_fn: ItemFn) -> Result<proc_macro2::TokenSt
 
             fn #register_fn(
                 router: axum::Router<crate::state::AppState>,
+                prefix: &str,
             ) -> axum::Router<crate::state::AppState> {
-                let path = crate::registry::scoped_path(#path);
+                let path = crate::registry::scoped_path(#path, prefix);
                 router.route(&path, #route_fn(super::#ident))
             }
 

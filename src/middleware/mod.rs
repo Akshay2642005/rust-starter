@@ -34,7 +34,8 @@ pub fn apply(router: Router, config: &Config) -> Router {
 
     let service_stack = ServiceBuilder::new()
         .layer(CatchPanicLayer::new())
-        .layer(CompressionLayer::new())
+        .layer(PropagateRequestIdLayer::new(request_id_header.clone()))
+        .layer(SetRequestIdLayer::new(request_id_header, MakeRequestUuid))
         .layer(security::cache_control_layer())
         .layer(security::content_type_options_layer())
         .layer(security::frame_options_layer())
@@ -88,9 +89,8 @@ pub fn apply(router: Router, config: &Config) -> Router {
                     },
                 ),
         )
-        .layer(PropagateRequestIdLayer::new(request_id_header.clone()))
-        .layer(SetRequestIdLayer::new(request_id_header, MakeRequestUuid))
-        .layer(cors_layer);
+        .layer(cors_layer)
+        .layer(CompressionLayer::new());
 
     router
         .layer(DefaultBodyLimit::max(max_body_size))

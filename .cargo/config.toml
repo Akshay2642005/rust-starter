@@ -2,6 +2,9 @@
 # two aliases for development and production
 d = "run --quiet"
 dev = "watch -q -c -x d"
+xtask = "run -p xtask --"
+x = "run -p xtask --"
+
 
 # Enable in Production
 [target.x86_64-unknown-linux-gnu]

@@ -1,77 +1,39 @@
-use std::{future::IntoFuture, net::SocketAddr, sync::Arc, time::Duration};
-
+use crate::{auth::BetterAuthService, middleware, registry, state::AppState};
 use anyhow::{Context, Result};
 use axum::Router;
 use configuration::Config;
-
 use seaorm::SeaOrmStore;
+use std::{future::Future, net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use tracing::info;
-
-use crate::{middleware, registry, state::AppState};
 
 pub struct Server {
     listener: TcpListener,
     app: Router,
-    shutdown_timeout: Duration,
-    min_graceful_shutdown: Duration,
     db: SeaOrmStore,
 }
 
 impl Server {
-    pub async fn run(self, mut shutdown: tokio::sync::broadcast::Receiver<()>) -> Result<()> {
-        let addr = self
-            .listener
+    pub async fn run<S>(self, shutdown: S) -> Result<()>
+    where
+        S: Future<Output = ()> + Send + 'static,
+    {
+        let Server {
+            listener, app, db, ..
+        } = self;
+        let addr = listener
             .local_addr()
             .context("could not read local address")?;
         info!(%addr, "http server started");
 
-        let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
-
-        let server = axum::serve(
-            self.listener,
-            self.app.into_make_service_with_connect_info::<SocketAddr>(),
+        axum::serve(
+            listener,
+            app.into_make_service_with_connect_info::<SocketAddr>(),
         )
-        .with_graceful_shutdown(async {
-            let _ = shutdown_rx.await;
-        });
+        .with_graceful_shutdown(shutdown)
+        .await
+        .context("server error")?;
 
-        let mut server_handle = tokio::spawn(server.into_future());
-
-        tokio::select! {
-            _ = shutdown.recv() => {
-                info!("shutdown signal received");
-                info!("initializing graceful shutdown");
-            }
-            result = &mut server_handle => {
-                return result
-                    .context("server task failed")?
-                    .context("server error");
-            }
-        }
-
-        let _ = shutdown_tx.send(());
-
-        if !self.min_graceful_shutdown.is_zero() {
-            tokio::time::sleep(self.min_graceful_shutdown).await;
-        }
-
-        match tokio::time::timeout(self.shutdown_timeout, &mut server_handle).await {
-            Ok(result) => {
-                result
-                    .context("server task failed")?
-                    .context("server error")?;
-            }
-            Err(_) => {
-                tracing::warn!(
-                    timeout_secs = self.shutdown_timeout.as_secs(),
-                    "graceful shutdown timed out; forcing exit"
-                );
-                server_handle.abort();
-            }
-        }
-
-        let db = self.db;
         if let Err(error) = db.close().await {
             tracing::warn!(%error, "failed to close database connections cleanly");
         }
@@ -96,7 +58,11 @@ impl ServerBuilder {
 
         store.ping().await.context("database ping failed")?;
 
-        let state = AppState::new(Arc::clone(&self.cfg), store.clone());
+        let auth = BetterAuthService::build(&self.cfg)
+            .await
+            .context("failed to initialize auth")?;
+
+        let state = AppState::new(Arc::clone(&self.cfg), store.clone(), auth);
         let app = build_router(state, &self.cfg);
 
         let addr: SocketAddr =
@@ -106,22 +72,19 @@ impl ServerBuilder {
             .with_context(|| format!("failed to bind TCP listener to {addr}"))?;
         info!(%addr, "tcp listener bound — ready to serve");
 
-        let shutdown_timeout = Duration::from_secs(self.cfg.server.shutdown_timeout_secs);
-        let min_graceful_shutdown = Duration::from_secs(self.cfg.server.min_graceful_shutdown_secs);
-
         Ok(Server {
             listener,
             app,
-            shutdown_timeout,
-            min_graceful_shutdown,
             db: store,
         })
     }
 }
 
 fn build_router(state: AppState, cfg: &Config) -> Router {
-    let path_prefix = cfg.server.path_prefix.clone();
-    registry::set_route_prefix(&path_prefix);
-    let router = registry::install_routes(Router::<AppState>::new()).with_state(state);
+    let auth_service = state.auth.router().into_service();
+    let auth_path = registry::join_paths(&cfg.server.path_prefix, &cfg.auth.path_prefix);
+    let router = registry::install_routes(Router::<AppState>::new(), &cfg.server.path_prefix)
+        .nest_service(&auth_path, auth_service)
+        .with_state(state);
     middleware::apply(router, cfg)
 }

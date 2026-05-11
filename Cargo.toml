@@ -7,6 +7,11 @@ description = "A Rust starter template for building production ready backend ser
 
 # Define dependencies for the root package here.
 [dependencies]
+
+# auth exclusive to package, not shared across the workspace
+better-auth = { version = "0.10", features = ["sqlx-postgres", "axum"] }
+argon2 = "0.5"
+
 # Http
 axum = { workspace = true }
 tower = { workspace = true }
@@ -25,6 +30,7 @@ tracing = { workspace = true }
 
 # Async
 tokio = { workspace = true }
+async-trait = { workspace = true }
 
 # Registry
 inventory = {workspace = true }
@@ -50,6 +56,14 @@ members = [
     "crates/seaorm",
     "crates/telemetry",
     "crates/macros",
+    "tooling/xtask",
+]
+default-members = [
+    ".",
+    "crates/configuration",
+    "crates/seaorm",
+    "crates/telemetry",
+    "crates/macros",
 ]
 
 # Workspace package settings
@@ -66,6 +80,10 @@ license = "MIT"
 # Error Handling
 anyhow = "1"
 thiserror = "1"
+
+# CLI Tooling
+clap = { version = "4", features = ["derive", "env"] }
+xshell = "0.2"
 
 # Configuration
 arc-swap = "1.7.1"
