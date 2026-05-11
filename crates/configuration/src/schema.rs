@@ -51,6 +51,16 @@ pub struct TelemetryConfig {
     pub include_file: bool,
     #[serde(default)]
     pub include_line_number: bool,
+    #[serde(default)]
+    pub otlp: OtlpConfig,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct OtlpConfig {
+    #[serde(default = "default_enabled")]
+    pub enabled: bool,
+    #[serde(default = "default_endpoint")]
+    pub endpoint: String,
 }
 
 impl Default for TelemetryConfig {
@@ -63,6 +73,16 @@ impl Default for TelemetryConfig {
             ansi: default_ansi(),
             include_file: false,
             include_line_number: false,
+            otlp: OtlpConfig::default(),
+        }
+    }
+}
+
+impl Default for OtlpConfig {
+    fn default() -> Self {
+        Self {
+            enabled: default_enabled(),
+            endpoint: default_endpoint(),
         }
     }
 }
@@ -81,4 +101,12 @@ fn default_filter() -> String {
 
 fn default_ansi() -> bool {
     std::io::IsTerminal::is_terminal(&std::io::stderr())
+}
+
+fn default_enabled() -> bool {
+    false
+}
+
+fn default_endpoint() -> String {
+    "http://localhost:4317".to_owned()
 }

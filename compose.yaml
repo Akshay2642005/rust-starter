@@ -17,6 +17,15 @@ services:
     networks:
       - rust-starter-network
 
+  jaeger:
+    image: jaegertracing/jaeger
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+    networks:
+      - rust-starter-network
+
   db:
     image: postgres
     restart: always

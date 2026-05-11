@@ -63,8 +63,6 @@ impl ServerBuilder {
 
         store.ping().await.context("database ping failed")?;
 
-        info!("database connection verified");
-
         let state = AppState::new(Arc::clone(&self.cfg), store);
         let app = build(state);
 

@@ -2,6 +2,8 @@
 pub enum TraceInitError {
     InvalidFilter(tracing_subscriber::filter::ParseError),
     InstallSubscriber(tracing_subscriber::util::TryInitError),
+    LogBridge(log::SetLoggerError),
+    OtlpPipeline(opentelemetry::trace::TraceError),
 }
 
 impl std::fmt::Display for TraceInitError {
@@ -11,6 +13,8 @@ impl std::fmt::Display for TraceInitError {
             Self::InstallSubscriber(error) => {
                 write!(f, "failed to install telemetry subscriber: {error}")
             }
+            Self::LogBridge(error) => write!(f, "failed to initialize log bridge: {error}"),
+            Self::OtlpPipeline(error) => write!(f, "failed to build OTLP pipeline: {error}"),
         }
     }
 }

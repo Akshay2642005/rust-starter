@@ -2,59 +2,89 @@ use std::sync::Arc;
 
 use crate::error::TraceInitError;
 use configuration::{Config, LogFormat};
+use opentelemetry::KeyValue;
+use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_sdk::Resource;
 use tracing_error::ErrorLayer;
-
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::{EnvFilter, Layer, fmt, prelude::*};
 
-pub fn init_tracing(config: Arc<Config>) -> Result<(), TraceInitError> {
+pub struct TelemetryGuard;
+
+pub fn init_tracing(config: Arc<Config>) -> Result<TelemetryGuard, TraceInitError> {
     let filter =
         EnvFilter::try_new(&config.telemetry.filter).map_err(TraceInitError::InvalidFilter)?;
 
-    let result = match &config.telemetry.format {
-        LogFormat::Compact => {
-            let layer = base_fmt_layer(&config).compact().with_filter(filter);
-            tracing_subscriber::registry()
-                .with(ErrorLayer::default())
-                .with(layer)
-                .try_init()
-                .map_err(TraceInitError::InstallSubscriber)
-        }
-        LogFormat::Pretty => {
-            let layer = base_fmt_layer(&config).pretty().with_filter(filter);
-            tracing_subscriber::registry()
-                .with(ErrorLayer::default())
-                .with(layer)
-                .try_init()
-                .map_err(TraceInitError::InstallSubscriber)
-        }
-        LogFormat::Json => {
-            let layer = base_fmt_layer(&config)
-                .json()
-                .flatten_event(true)
-                .with_current_span(true)
-                .with_span_list(true)
-                .with_filter(filter);
+    let fmt_layer = build_fmt_layer(&config, filter);
 
-            tracing_subscriber::registry()
-                .with(ErrorLayer::default())
-                .with(layer)
-                .try_init()
-                .map_err(TraceInitError::InstallSubscriber)
-        }
+    let result = if config.telemetry.otlp.enabled {
+        let exporter = opentelemetry_otlp::SpanExporter::builder()
+            .with_tonic()
+            .with_endpoint(&config.telemetry.otlp.endpoint)
+            .build()
+            .map_err(TraceInitError::OtlpPipeline)?;
+
+        let resource = Resource::new(vec![
+            KeyValue::new(opentelemetry_semantic_conventions::resource::SERVICE_NAME, config.telemetry.service_name.clone()),
+            KeyValue::new("deployment.environment", config.telemetry.environment.clone()),
+        ]);
+
+        let provider = opentelemetry_sdk::trace::TracerProvider::builder()
+            .with_batch_exporter(exporter, opentelemetry_sdk::runtime::Tokio)
+            .with_resource(resource)
+            .build();
+
+        let tracer = opentelemetry::trace::TracerProvider::tracer(&provider, config.telemetry.service_name.clone());
+        opentelemetry::global::set_tracer_provider(provider);
+
+        let otlp_filter = EnvFilter::try_new(&config.telemetry.filter)
+            .map_err(TraceInitError::InvalidFilter)?
+            .add_directive("h2=off".parse().unwrap())
+            .add_directive("hyper=off".parse().unwrap())
+            .add_directive("tonic=off".parse().unwrap());
+
+        tracing_subscriber::registry()
+            .with(ErrorLayer::default())
+            .with(fmt_layer)
+            .with(tracing_opentelemetry::layer().with_tracer(tracer).with_filter(otlp_filter))
+            .try_init()
+            .map_err(TraceInitError::InstallSubscriber)
+    } else {
+        tracing_subscriber::registry()
+            .with(ErrorLayer::default())
+            .with(fmt_layer)
+            .try_init()
+            .map_err(TraceInitError::InstallSubscriber)
     };
 
-    if result.is_ok() {
-        tracing::info!(
-            service.name = %config.telemetry.service_name,
-            deployment.environment = %config.telemetry.environment,
-            telemetry.format = ?config.telemetry.format,
-            telemetry.filter = %config.telemetry.filter,
-            "telemetry initialized"
-        );
-    }
+    result?;
 
-    result
+    tracing::info!(
+        service.name = %config.telemetry.service_name,
+        deployment.environment = %config.telemetry.environment,
+        telemetry.format = ?config.telemetry.format,
+        telemetry.filter = %config.telemetry.filter,
+        "telemetry initialized"
+    );
+
+    Ok(TelemetryGuard)
+}
+
+fn build_fmt_layer<S>(c: &Config, filter: EnvFilter) -> Box<dyn Layer<S> + Send + Sync>
+where
+    S: tracing::Subscriber + for<'span> tracing_subscriber::registry::LookupSpan<'span>,
+{
+    match &c.telemetry.format {
+        LogFormat::Compact => base_fmt_layer(c).compact().with_filter(filter).boxed(),
+        LogFormat::Pretty => base_fmt_layer(c).pretty().with_filter(filter).boxed(),
+        LogFormat::Json => base_fmt_layer(c)
+            .json()
+            .flatten_event(true)
+            .with_current_span(true)
+            .with_span_list(true)
+            .with_filter(filter)
+            .boxed(),
+    }
 }
 
 fn base_fmt_layer<S>(c: &Config) -> fmt::Layer<S>
@@ -68,4 +98,11 @@ where
         .with_file(c.telemetry.include_file)
         .with_line_number(c.telemetry.include_line_number)
         .with_span_events(FmtSpan::CLOSE)
+}
+
+impl Drop for TelemetryGuard {
+    fn drop(&mut self) {
+        tracing::info!("telemetry shutting down");
+        opentelemetry::global::shutdown_tracer_provider();
+    }
 }

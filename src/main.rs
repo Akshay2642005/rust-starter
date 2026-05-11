@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 mod app;
 mod state;
 
@@ -16,7 +15,7 @@ async fn main() -> anyhow::Result<()> {
     let config = config_handle.load();
 
     manager.spawn_watcher();
-    telemetry::init_tracing(config.clone()).context("failed to initialize telemetry")?;
+    let _telemetry = telemetry::init_tracing(config.clone()).context("failed to initialize telemetry")?;
 
     info!(env = %app_env, name = %config.primary.name, "config loaded");
     let server = app::ServerBuilder::new(config).build().await?;

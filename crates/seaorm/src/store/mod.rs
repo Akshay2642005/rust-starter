@@ -1,8 +1,6 @@
 //! Generic SeaORM store.
 
 pub mod entities;
-pub mod migrations;
-pub mod migrator;
 pub mod repository;
 
 use configuration::Config;
@@ -33,9 +31,6 @@ pub struct SeaOrmStore {
 impl SeaOrmStore {
     /// Connect to Postgres and run pending migrations.
     pub async fn connect_and_migrate(cfg: &Config) -> OrmResult<Self> {
-        use migrator::AppMigrator;
-        use sea_orm_migration::MigratorTrait;
-
         let mut opts = ConnectOptions::new(&cfg.store.url);
         opts.max_connections(cfg.store.max_connections)
             .min_connections(cfg.store.min_connections)
@@ -47,9 +42,6 @@ impl SeaOrmStore {
 
         info!("connecting to postgres…");
         let db = Database::connect(opts).await.map_err(map_db_err)?;
-
-        info!("running pending migrations…");
-        AppMigrator::up(&db, None).await.map_err(map_db_err)?;
 
         info!("store ready");
         Ok(Self { db: Arc::new(db) })

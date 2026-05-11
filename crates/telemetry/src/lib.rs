@@ -1,3 +1,4 @@
-mod tracing;
 mod error;
-pub use tracing::init_tracing;
+mod tracing;
+pub use error::TraceInitError;
+pub use tracing::{TelemetryGuard, init_tracing};

@@ -14,3 +14,8 @@ tracing-subscriber = { workspace = true }
 tracing-error = { workspace = true }
 tracing-log = { workspace = true }
 configuration = { workspace = true }
+opentelemetry         = { workspace = true }
+opentelemetry_sdk     = { workspace = true }
+opentelemetry-otlp    = { workspace = true }
+opentelemetry-semantic-conventions = { workspace = true }
+tracing-opentelemetry = { workspace = true }
