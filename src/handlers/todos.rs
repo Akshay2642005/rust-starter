@@ -3,7 +3,7 @@ use crate::{response::todo::*, services::todo as svc, state::AppState};
 use axum::{Json, extract::State, http::StatusCode};
 use macros::{instrument_handler, route};
 
-#[route(POST, "/todos")]
+#[route(POST, "/todos", protected)]
 #[instrument_handler]
 pub async fn create_todo(
     State(state): State<AppState>,

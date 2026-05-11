@@ -3,7 +3,7 @@
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{
-    parse::Parse, parse::ParseStream, parse_macro_input, Ident, ItemFn, LitStr, Result, Token,
+    Ident, ItemFn, LitStr, Result, Token, parse::Parse, parse::ParseStream, parse_macro_input,
 };
 
 /// Parsed arguments for:
@@ -104,10 +104,7 @@ fn expand_inner(args: RouteArgs, item_fn: ItemFn) -> Result<proc_macro2::TokenSt
             }
 
             inventory::submit! {
-                crate::registry::RouteEntry {
-                    install: #register_fn,
-                    protected: #protected,
-                }
+                crate::registry::RouteEntry::new(#register_fn, #protected)
             }
         }
     })
