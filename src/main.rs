@@ -1,5 +1,13 @@
 mod app;
+mod domain;
+mod handlers;
+mod middleware;
+mod registry;
+mod response;
+mod services;
 mod state;
+
+pub use state::AppState;
 
 use anyhow::Context;
 use configuration::ConfigManager;
@@ -15,7 +23,8 @@ async fn main() -> anyhow::Result<()> {
     let config = config_handle.load();
 
     manager.spawn_watcher();
-    let _telemetry = telemetry::init_tracing(config.clone()).context("failed to initialize telemetry")?;
+    let _telemetry =
+        telemetry::init_tracing(config.clone()).context("failed to initialize telemetry")?;
 
     info!(env = %app_env, name = %config.primary.name, "config loaded");
     let server = app::ServerBuilder::new(config).build().await?;

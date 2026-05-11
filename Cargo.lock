@@ -1421,6 +1421,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "inventory"
+version = "0.3.24"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4f0c30c76f2f4ccee3fe55a2435f691ca00c0e4bd87abe4f4a851b1d4dac39b"
+dependencies = [
+ "rustversion",
+]
+
+[[package]]
 name = "is_terminal_polyfill"
 version = "1.70.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1552,6 +1561,16 @@ dependencies = [
  "nix",
  "serde",
  "winapi",
+]
+
+[[package]]
+name = "macros"
+version = "0.1.0"
+dependencies = [
+ "inventory",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.117",
 ]
 
 [[package]]
@@ -2332,10 +2351,16 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum 0.8.9",
+ "chrono",
  "configuration",
+ "inventory",
+ "macros",
  "sea-orm",
  "seaorm",
+ "serde",
+ "serde_json",
  "telemetry",
+ "thiserror 1.0.69",
  "tokio",
  "tower 0.5.3",
  "tower-http",
@@ -2607,6 +2632,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "configuration",
+ "log",
  "sea-orm",
  "sea-orm-migration",
  "serde",
@@ -3126,7 +3152,6 @@ dependencies = [
  "opentelemetry-otlp",
  "opentelemetry-semantic-conventions",
  "opentelemetry_sdk",
- "serde",
  "tracing",
  "tracing-error",
  "tracing-log",

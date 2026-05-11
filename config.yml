@@ -5,7 +5,7 @@ primary:
 telemetry:
   service_name: rust-starter
   environment: development
-  filter: info,tower_http=info,rust_starter=trace
+  filter: info,tower_http=warn,rust_starter=trace
   format: compact
   ansi: true
   include_file: false

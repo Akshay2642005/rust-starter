@@ -5,15 +5,12 @@ use seaorm::SeaOrmStore;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub _config: Arc<Config>,
-    pub _db: SeaOrmStore,
+    pub config: Arc<Config>,
+    pub db: SeaOrmStore,
 }
 
 impl AppState {
     pub fn new(config: Arc<Config>, db: SeaOrmStore) -> Self {
-        Self {
-            _config: config,
-            _db: db,
-        }
+        Self { config, db }
     }
 }

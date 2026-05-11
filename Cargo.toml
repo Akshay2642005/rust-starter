@@ -14,6 +14,11 @@ tower-http = { workspace = true }
 
 # Error Handling
 anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Data Serialization and Deserialization
+serde = { workspace = true }
+serde_json = { workspace = true }
 
 # Observability and Logging
 tracing = { workspace = true }
@@ -21,10 +26,17 @@ tracing = { workspace = true }
 # Async
 tokio = { workspace = true }
 
+# Registry
+inventory = {workspace = true }
+
+# Date/Time
+chrono = { workspace = true }
+
 # Workspace Crates
 configuration = { workspace = true }
 seaorm = { workspace = true }
 telemetry = { workspace = true }
+macros = { workspace = true }
 
 # internal crates can be added here as dependencies for the root package,
 
@@ -37,6 +49,7 @@ members = [
     "crates/configuration",
     "crates/seaorm",
     "crates/telemetry",
+    "crates/macros",
 ]
 
 # Workspace package settings
@@ -105,10 +118,20 @@ validator = { version = "0.18", features = ["derive"] }
 utoipa = { version = "4", features = ["axum_extras", "chrono", "uuid"] }
 utoipa-scalar = { version = "0.1", features = ["axum"] }
 
+
+# Proc macro
+inventory = "0.3"
+paste = "1"
+proc-macro2 = "1"
+quote = "1"
+syn = {version = "2", features = ["full"] }
+
+
 # Member Crates
 configuration = { path = "crates/configuration"}
 seaorm = { path = "crates/seaorm" }
 telemetry = { path = "crates/telemetry" }
+macros = { path = "crates/macros" }
 
 
 # Profile settings for development and release builds. These settings can be overridden in individual member packages if needed.

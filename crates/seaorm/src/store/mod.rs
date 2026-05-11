@@ -38,7 +38,8 @@ impl SeaOrmStore {
             .acquire_timeout(Duration::from_secs(cfg.store.acquire_timeout_secs))
             .idle_timeout(Duration::from_secs(cfg.store.idle_timeout_secs))
             .max_lifetime(Duration::from_secs(cfg.store.max_lifetime_secs))
-            .sqlx_logging(cfg.store.sqlx_logging);
+            .sqlx_logging(cfg.store.sqlx_logging)
+            .sqlx_logging_level(log::LevelFilter::Debug);
 
         info!("connecting to postgres…");
         let db = Database::connect(opts).await.map_err(map_db_err)?;
