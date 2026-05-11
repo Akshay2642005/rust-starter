@@ -1,5 +1,3 @@
-//! HTTP response DTOs — map from domain types to JSON-serializable structs.
-
 use crate::domain::health;
 use chrono::{DateTime, Utc};
 use serde::Serialize;

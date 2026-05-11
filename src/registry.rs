@@ -1,16 +1,19 @@
 //! Route registry and installation utilities for HTTP handlers.
-use crate::state::AppState;
-use axum::Router;
+
+use axum::{Router, middleware};
+
+use crate::{middleware::require_auth, state::AppState};
 
 pub type RouteInstaller = fn(Router<AppState>, &str) -> Router<AppState>;
 
 pub struct RouteEntry {
     pub install: RouteInstaller,
+    pub protected: bool,
 }
 
 impl RouteEntry {
-    pub const fn new(install: RouteInstaller) -> Self {
-        Self { install }
+    pub const fn new(install: RouteInstaller, protected: bool) -> Self {
+        Self { install, protected }
     }
 }
 
@@ -43,14 +46,26 @@ pub fn join_paths(prefix: &str, path: &str) -> String {
     format!("/{prefix}/{path}")
 }
 
-pub fn install_routes(mut router: Router<AppState>, prefix: &str) -> Router<AppState> {
+pub fn install_routes(router: Router<AppState>, prefix: &str, state: AppState) -> Router<AppState> {
+    let mut public_router = Router::new();
+
+    let mut protected_router = Router::new();
+
     for entry in inventory::iter::<RouteEntry> {
-        router = (entry.install)(router, prefix);
+        if entry.protected {
+            protected_router = (entry.install)(protected_router, prefix);
+        } else {
+            public_router = (entry.install)(public_router, prefix);
+        }
     }
 
-    router
+    protected_router =
+        protected_router.route_layer(middleware::from_fn_with_state(state.clone(), require_auth));
+
+    router.merge(public_router).merge(protected_router)
 }
 
 fn normalize_path_segment(path: &str) -> &str {
     path.trim_matches('/')
 }
+

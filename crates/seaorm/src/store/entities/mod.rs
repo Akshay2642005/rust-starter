@@ -4,5 +4,6 @@ pub mod prelude;
 
 pub mod accounts;
 pub mod sessions;
+pub mod todos;
 pub mod users;
 pub mod verifications;

@@ -19,6 +19,9 @@ pub struct BetterAuthService {
 }
 
 impl BetterAuthService {
+    pub fn inner(&self) -> Arc<BetterAuthInstance> {
+        Arc::clone(&self.inner)
+    }
     pub async fn build(config: &configuration::Config) -> Result<Self> {
         let password_hasher = Self::build_password_hasher(config);
         let adapter =

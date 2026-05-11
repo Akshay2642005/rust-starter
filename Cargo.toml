@@ -8,6 +8,9 @@ description = "A Rust starter template for building production ready backend ser
 # Define dependencies for the root package here.
 [dependencies]
 
+#uuid
+uuid = "1.23.1"
+
 # auth exclusive to package, not shared across the workspace
 better-auth = { version = "0.10", features = ["sqlx-postgres", "axum"] }
 argon2 = "0.5"

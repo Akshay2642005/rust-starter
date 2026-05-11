@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
 use crate::auth::BetterAuthService;
+use axum::extract::FromRef;
+use better_auth::{BetterAuth, adapters::SqlxAdapter};
 use configuration::Config;
 use seaorm::SeaOrmStore;
 
@@ -14,5 +16,11 @@ pub struct AppState {
 impl AppState {
     pub fn new(config: Arc<Config>, db: SeaOrmStore, auth: BetterAuthService) -> Self {
         Self { config, db, auth }
+    }
+}
+
+impl FromRef<AppState> for Arc<BetterAuth<SqlxAdapter>> {
+    fn from_ref(state: &AppState) -> Self {
+        state.auth.inner()
     }
 }

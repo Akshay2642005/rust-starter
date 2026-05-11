@@ -3,22 +3,39 @@
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
 use syn::{
-    Ident, ItemFn, LitStr, Result, Token, parse::Parse, parse::ParseStream, parse_macro_input,
+    parse::Parse, parse::ParseStream, parse_macro_input, Ident, ItemFn, LitStr, Result, Token,
 };
 
-/// Parsed arguments for the `#[route(METHOD, "/path")]` attribute.
+/// Parsed arguments for:
+///
+/// #[route(GET, "/health")]
+/// #[route(POST, "/todos", protected)]
 struct RouteArgs {
     method: Ident,
     _comma: Token![,],
     path: LitStr,
+    protected: Option<(Token![,], Ident)>,
 }
 
 impl Parse for RouteArgs {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
+        let method = input.parse()?;
+        let comma = input.parse()?;
+        let path = input.parse()?;
+
+        let protected = if input.peek(Token![,]) {
+            let comma2 = input.parse()?;
+            let ident = input.parse()?;
+            Some((comma2, ident))
+        } else {
+            None
+        };
+
         Ok(Self {
-            method: input.parse()?,
-            _comma: input.parse()?,
-            path: input.parse()?,
+            method,
+            _comma: comma,
+            path,
+            protected,
         })
     }
 }
@@ -37,6 +54,7 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
 /// Builds the route registration module and inventory submission.
 fn expand_inner(args: RouteArgs, item_fn: ItemFn) -> Result<proc_macro2::TokenStream> {
     let method = args.method.to_string().to_uppercase();
+
     let route_fn = match method.as_str() {
         "GET" => quote!(axum::routing::get),
         "POST" => quote!(axum::routing::post),
@@ -51,9 +69,18 @@ fn expand_inner(args: RouteArgs, item_fn: ItemFn) -> Result<proc_macro2::TokenSt
         }
     };
 
+    let protected = args
+        .protected
+        .as_ref()
+        .map(|(_, ident)| ident == "protected")
+        .unwrap_or(false);
+
     let path = args.path;
+
     let ident = &item_fn.sig.ident;
+
     let register_mod = format_ident!("__route_registration_{}", ident);
+
     let register_fn = format_ident!("__register_{}", ident);
 
     Ok(quote! {
@@ -67,12 +94,20 @@ fn expand_inner(args: RouteArgs, item_fn: ItemFn) -> Result<proc_macro2::TokenSt
                 router: axum::Router<crate::state::AppState>,
                 prefix: &str,
             ) -> axum::Router<crate::state::AppState> {
-                let path = crate::registry::scoped_path(#path, prefix);
-                router.route(&path, #route_fn(super::#ident))
+                let path =
+                    crate::registry::scoped_path(#path, prefix);
+
+                router.route(
+                    &path,
+                    #route_fn(super::#ident),
+                )
             }
 
             inventory::submit! {
-                crate::registry::RouteEntry::new(#register_fn)
+                crate::registry::RouteEntry {
+                    install: #register_fn,
+                    protected: #protected,
+                }
             }
         }
     })

@@ -2,5 +2,6 @@
 
 pub use super::accounts::Entity as Accounts;
 pub use super::sessions::Entity as Sessions;
+pub use super::todos::Entity as Todos;
 pub use super::users::Entity as Users;
 pub use super::verifications::Entity as Verifications;

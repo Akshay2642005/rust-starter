@@ -2,10 +2,13 @@
 //!
 //! This module builds a layered middleware stack for security, tracing,
 //! CORS, request IDs, body limits, and timeouts.
+mod auth;
 mod cors;
 mod request_id;
 mod security;
 mod timeout;
+
+pub use auth::require_auth;
 
 use axum::{
     Router,

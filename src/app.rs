@@ -18,9 +18,7 @@ impl Server {
     where
         S: Future<Output = ()> + Send + 'static,
     {
-        let Server {
-            listener, app, db, ..
-        } = self;
+        let Server { listener, app, db } = self;
         let addr = listener
             .local_addr()
             .context("could not read local address")?;
@@ -83,8 +81,12 @@ impl ServerBuilder {
 fn build_router(state: AppState, cfg: &Config) -> Router {
     let auth_service = state.auth.router().into_service();
     let auth_path = registry::join_paths(&cfg.server.path_prefix, &cfg.auth.path_prefix);
-    let router = registry::install_routes(Router::<AppState>::new(), &cfg.server.path_prefix)
-        .nest_service(&auth_path, auth_service)
-        .with_state(state);
+    let router = registry::install_routes(
+        Router::<AppState>::new(),
+        &cfg.server.path_prefix,
+        state.clone(),
+    )
+    .nest_service(&auth_path, auth_service)
+    .with_state(state);
     middleware::apply(router, cfg)
 }
