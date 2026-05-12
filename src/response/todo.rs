@@ -1,25 +1,35 @@
 use crate::domain::todo;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize)]
+/// API response for a single todo item.
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct TodoResponse {
+    /// Unique identifier.
     pub id: Uuid,
+    /// Short description of the task.
     pub title: String,
+    /// Whether the task has been completed.
     pub done: bool,
+    /// When the todo was created (UTC).
     pub created_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+/// Request body for creating a todo.
+#[derive(Debug, Clone, Deserialize, ToSchema)]
 pub struct CreateTodoRequest {
+    /// Short description of the task (required, non-empty).
     pub title: String,
 }
 
-#[allow(dead_code)]
-#[derive(Debug, Clone, Deserialize)]
+/// Request body for updating a todo.
+#[derive(Debug, Clone, Deserialize, ToSchema)]
 pub struct UpdateTodoRequest {
+    /// New title, if changing.
     pub title: Option<String>,
+    /// New completion state, if changing.
     pub done: Option<bool>,
 }
 

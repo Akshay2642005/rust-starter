@@ -1,26 +1,27 @@
 use crate::domain::health;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct ProbeResponse {
     pub status: String,
     pub timestamp: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct ComponentStatus {
     pub status: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub detail: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct StatusChecks {
     pub database: ComponentStatus,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct StatusResponse {
     pub status: String,
     pub service: String,

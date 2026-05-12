@@ -3,6 +3,7 @@ mod auth;
 mod domain;
 mod handlers;
 mod middleware;
+mod openapi;
 mod registry;
 mod response;
 mod services;

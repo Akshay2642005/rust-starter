@@ -41,6 +41,9 @@ inventory = {workspace = true }
 # Date/Time
 chrono = { workspace = true }
 
+# OpenAPI
+utoipa = { workspace = true }
+
 # Workspace Crates
 configuration = { workspace = true }
 seaorm = { workspace = true }

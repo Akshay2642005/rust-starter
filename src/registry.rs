@@ -68,4 +68,3 @@ pub fn install_routes(router: Router<AppState>, prefix: &str, state: AppState) -
 fn normalize_path_segment(path: &str) -> &str {
     path.trim_matches('/')
 }
-

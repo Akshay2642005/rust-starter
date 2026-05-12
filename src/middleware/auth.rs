@@ -25,7 +25,13 @@ pub async fn require_auth(
         .find_map(|cookie| {
             let cookie = cookie.trim();
 
-            if cookie.starts_with("session=") {
+            if cookie.starts_with("better-auth.session-token=") {
+                Some(
+                    cookie
+                        .trim_start_matches("better-auth.session-token=")
+                        .to_string(),
+                )
+            } else if cookie.starts_with("session=") {
                 Some(cookie.trim_start_matches("session=").to_string())
             } else {
                 None
