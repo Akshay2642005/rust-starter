@@ -44,6 +44,9 @@ chrono = { workspace = true }
 # OpenAPI
 utoipa = { workspace = true }
 
+# HTTP client
+reqwest = { workspace = true }
+
 # Workspace Crates
 configuration = { workspace = true }
 seaorm = { workspace = true }

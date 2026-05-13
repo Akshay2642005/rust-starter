@@ -23,18 +23,17 @@ use crate::{
         },
     },
     response::{
+        error::ErrorResponse,
         system::{ComponentStatus, ProbeResponse, StatusChecks, StatusResponse},
         todo::{CreateTodoRequest, TodoResponse, UpdateTodoRequest},
     },
 };
 
-struct BearerAuth;
-
-impl Modify for BearerAuth {
+struct ApiV1Server;
+impl Modify for ApiV1Server {
     fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
         openapi.servers = Some(vec![
             ServerBuilder::new().url("http://localhost:8080/api/v1").build(),
-            ServerBuilder::new().url("http://localhost:8080").build(),
         ]);
         if let Some(components) = openapi.components.as_mut() {
             components.add_security_scheme(
@@ -50,26 +49,41 @@ impl Modify for BearerAuth {
     }
 }
 
+struct RootServer;
+impl Modify for RootServer {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        openapi.servers = Some(vec![
+            ServerBuilder::new().url("http://localhost:8080").build(),
+        ]);
+    }
+}
+
 #[derive(OpenApi)]
 #[openapi(
     info(
-        title = "Rust Starter API",
+        title = "App API",
         version = "0.1.0",
         description = "Production-ready Rust backend starter — todo service",
         license(name = "MIT"),
     ),
-    paths(
-        health, healthz, livez, readyz, status,
-        create_todo, get_todos, get_todo_by_id, update_todo, delete_todo,
-    ),
-    components(schemas(
-        ProbeResponse, ComponentStatus, StatusChecks, StatusResponse,
-        TodoResponse, CreateTodoRequest, UpdateTodoRequest,
-    )),
-    tags(
-        (name = "system", description = "Health and status endpoints"),
-        (name = "todos", description = "Todo management endpoints"),
-    ),
-    modifiers(&BearerAuth),
+    paths(create_todo, get_todos, get_todo_by_id, update_todo, delete_todo),
+    components(schemas(ErrorResponse, TodoResponse, CreateTodoRequest, UpdateTodoRequest)),
+    tags((name = "todos", description = "Todo management endpoints")),
+    modifiers(&ApiV1Server),
 )]
-pub struct ApiDoc;
+pub struct AppApiDoc;
+
+#[derive(OpenApi)]
+#[openapi(
+    info(
+        title = "System API",
+        version = "0.1.0",
+        description = "Health and status endpoints",
+        license(name = "MIT"),
+    ),
+    paths(health, healthz, livez, readyz, status),
+    components(schemas(ProbeResponse, ComponentStatus, StatusChecks, StatusResponse)),
+    tags((name = "system", description = "Health and status endpoints")),
+    modifiers(&RootServer),
+)]
+pub struct SystemApiDoc;
