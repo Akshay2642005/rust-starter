@@ -6,13 +6,8 @@
 //! let router = router.merge(Scalar::with_url("/docs", ApiDoc::openapi()));
 //! ```
 
-use utoipa::{
-    Modify, OpenApi,
-    openapi::{
-        ServerBuilder,
-        security::{HttpAuthScheme, HttpBuilder, SecurityScheme},
-    },
-};
+use configuration::Config;
+use utoipa::OpenApi;
 
 use crate::{
     handlers::{
@@ -29,35 +24,6 @@ use crate::{
     },
 };
 
-struct ApiV1Server;
-impl Modify for ApiV1Server {
-    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
-        openapi.servers = Some(vec![
-            ServerBuilder::new().url("http://localhost:8080/api/v1").build(),
-        ]);
-        if let Some(components) = openapi.components.as_mut() {
-            components.add_security_scheme(
-                "bearer_token",
-                SecurityScheme::Http(
-                    HttpBuilder::new()
-                        .scheme(HttpAuthScheme::Bearer)
-                        .bearer_format("JWT")
-                        .build(),
-                ),
-            );
-        }
-    }
-}
-
-struct RootServer;
-impl Modify for RootServer {
-    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
-        openapi.servers = Some(vec![
-            ServerBuilder::new().url("http://localhost:8080").build(),
-        ]);
-    }
-}
-
 #[derive(OpenApi)]
 #[openapi(
     info(
@@ -69,9 +35,8 @@ impl Modify for RootServer {
     paths(create_todo, get_todos, get_todo_by_id, update_todo, delete_todo),
     components(schemas(ErrorResponse, TodoResponse, CreateTodoRequest, UpdateTodoRequest)),
     tags((name = "todos", description = "Todo management endpoints")),
-    modifiers(&ApiV1Server),
 )]
-pub struct AppApiDoc;
+struct AppApiDoc;
 
 #[derive(OpenApi)]
 #[openapi(
@@ -84,6 +49,130 @@ pub struct AppApiDoc;
     paths(health, healthz, livez, readyz, status),
     components(schemas(ProbeResponse, ComponentStatus, StatusChecks, StatusResponse)),
     tags((name = "system", description = "Health and status endpoints")),
-    modifiers(&RootServer),
 )]
-pub struct SystemApiDoc;
+struct SystemApiDoc;
+
+// =======================================================================================
+// Helper functions for merging OpenAPI specs and serving the combined spec to Scalar UI.
+// =======================================================================================
+
+pub async fn serve_merged_auth_spec(auth_openapi_url: String) -> axum::response::Response {
+    use axum::http::StatusCode;
+    use axum::response::IntoResponse;
+
+    let app_schemas = extract_app_schemas();
+
+    let spec_json = match reqwest::get(auth_openapi_url).await {
+        Ok(resp) => match resp.text().await {
+            Ok(text) => text,
+            Err(e) => {
+                return (StatusCode::BAD_GATEWAY, e.to_string()).into_response();
+            }
+        },
+        Err(e) => {
+            return (StatusCode::BAD_GATEWAY, e.to_string()).into_response();
+        }
+    };
+
+    let mut spec: serde_json::Value = match serde_json::from_str(&spec_json) {
+        Ok(v) => v,
+        Err(e) => {
+            return (StatusCode::BAD_GATEWAY, e.to_string()).into_response();
+        }
+    };
+
+    if let (Some(spec_obj), Some(app_obj)) = (spec.as_object_mut(), app_schemas.as_object()) {
+        // Ensure components.schemas exists
+        if !spec_obj.contains_key("components") {
+            spec_obj.insert("components".into(), serde_json::json!({"schemas": {}}));
+        }
+        let components = spec_obj["components"].as_object_mut().unwrap();
+        if !components.contains_key("schemas") {
+            components.insert("schemas".into(), serde_json::json!({}));
+        }
+        let schemas = components["schemas"].as_object_mut().unwrap();
+        for (k, v) in app_obj {
+            schemas.entry(k.clone()).or_insert_with(|| v.clone());
+        }
+    }
+
+    axum::Json(spec).into_response()
+}
+
+fn extract_app_schemas() -> serde_json::Value {
+    use utoipa::OpenApi;
+    let mut schemas = serde_json::Map::new();
+    for spec in [AppApiDoc::openapi(), SystemApiDoc::openapi()] {
+        if let Ok(json) = serde_json::to_value(&spec)
+            && let Some(obj) = json
+                .get("components")
+                .and_then(|c| c.get("schemas"))
+                .and_then(|s| s.as_object())
+        {
+            for (k, v) in obj {
+                schemas.entry(k.clone()).or_insert_with(|| v.clone());
+            }
+        }
+    }
+    serde_json::Value::Object(schemas)
+}
+
+pub fn build_docs_html(cfg: &Config) -> String {
+    use utoipa::OpenApi;
+
+    let app_spec =
+        serde_json::to_string(&AppApiDoc::openapi()).expect("failed to serialize App API spec");
+
+    let system_spec = serde_json::to_string(&SystemApiDoc::openapi())
+        .expect("failed to serialize System API spec");
+
+    let auth_base_url = format!(
+        "http://localhost:{}{}{}",
+        cfg.server.port,
+        cfg.server.path_prefix.trim_end_matches('/'),
+        cfg.auth.path_prefix,
+    );
+
+    let app_base_url = format!(
+        "http://localhost:{}{}",
+        cfg.server.port,
+        cfg.server.path_prefix.trim_end_matches('/'),
+    );
+
+    let system_base_url = format!("http://localhost:{}", cfg.server.port,);
+
+    format!(
+        r#"<!doctype html>
+<html>
+  <head>
+    <title>API Reference</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+    <script>
+      Scalar.createApiReference('#app', {{
+        theme: 'default',
+        sources: [
+          {{ 
+            title: 'App API', content: {app_spec},
+            servers: [{{ url: '{app_base_url}' }}]
+          }},
+          {{ 
+            title: 'System API', content: {system_spec},
+            servers: [{{ url: '{system_base_url}' }}]
+          }},
+          {{
+            title: 'Auth API',
+            url: '/docs/auth-openapi.json',
+            servers: [{{ url: '{auth_base_url}' }}]
+          }}
+        ]
+      }});
+    </script>
+  </body>
+</html>"#
+    )
+}

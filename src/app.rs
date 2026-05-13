@@ -1,7 +1,7 @@
 use crate::{
     auth::BetterAuthService,
     middleware,
-    openapi::{AppApiDoc, SystemApiDoc},
+    openapi::{build_docs_html, serve_merged_auth_spec},
     registry,
     state::AppState,
 };
@@ -149,110 +149,4 @@ fn build_router(state: AppState, cfg: &Config) -> Router {
             config: global_rate_limit_cfg,
         })
         .layer(prometheus_layer)
-}
-
-async fn serve_merged_auth_spec(auth_openapi_url: String) -> axum::response::Response {
-    use axum::http::StatusCode;
-    use axum::response::IntoResponse;
-
-    let app_schemas = extract_app_schemas();
-
-    let spec_json = match reqwest::get(auth_openapi_url).await {
-        Ok(resp) => match resp.text().await {
-            Ok(text) => text,
-            Err(e) => {
-                return (StatusCode::BAD_GATEWAY, e.to_string()).into_response();
-            }
-        },
-        Err(e) => {
-            return (StatusCode::BAD_GATEWAY, e.to_string()).into_response();
-        }
-    };
-
-    let mut spec: serde_json::Value = match serde_json::from_str(&spec_json) {
-        Ok(v) => v,
-        Err(e) => {
-            return (StatusCode::BAD_GATEWAY, e.to_string()).into_response();
-        }
-    };
-
-    if let (Some(spec_obj), Some(app_obj)) = (spec.as_object_mut(), app_schemas.as_object()) {
-        // Ensure components.schemas exists
-        if !spec_obj.contains_key("components") {
-            spec_obj.insert("components".into(), serde_json::json!({"schemas": {}}));
-        }
-        let components = spec_obj["components"].as_object_mut().unwrap();
-        if !components.contains_key("schemas") {
-            components.insert("schemas".into(), serde_json::json!({}));
-        }
-        let schemas = components["schemas"].as_object_mut().unwrap();
-        for (k, v) in app_obj {
-            schemas.entry(k.clone()).or_insert_with(|| v.clone());
-        }
-    }
-
-    axum::Json(spec).into_response()
-}
-
-fn extract_app_schemas() -> serde_json::Value {
-    use utoipa::OpenApi;
-    let mut schemas = serde_json::Map::new();
-    for spec in [AppApiDoc::openapi(), SystemApiDoc::openapi()] {
-        if let Ok(json) = serde_json::to_value(&spec) {
-            if let Some(obj) = json
-                .get("components")
-                .and_then(|c| c.get("schemas"))
-                .and_then(|s| s.as_object())
-            {
-                for (k, v) in obj {
-                    schemas.entry(k.clone()).or_insert_with(|| v.clone());
-                }
-            }
-        }
-    }
-    serde_json::Value::Object(schemas)
-}
-
-fn build_docs_html(cfg: &Config) -> String {
-    use utoipa::OpenApi;
-    let app_spec =
-        serde_json::to_string(&AppApiDoc::openapi()).expect("failed to serialize App API spec");
-    let system_spec = serde_json::to_string(&SystemApiDoc::openapi())
-        .expect("failed to serialize System API spec");
-
-    let auth_base_url = format!(
-        "http://localhost:{}{}{}",
-        cfg.server.port,
-        cfg.server.path_prefix.trim_end_matches('/'),
-        cfg.auth.path_prefix,
-    );
-
-    format!(
-        r#"<!doctype html>
-<html>
-  <head>
-    <title>API Reference</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  </head>
-  <body>
-    <div id="app"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
-    <script>
-      Scalar.createApiReference('#app', {{
-        theme: 'default',
-        sources: [
-          {{ title: 'App API', content: {app_spec} }},
-          {{ title: 'System API', content: {system_spec} }},
-          {{
-            title: 'Auth API',
-            url: '/docs/auth-openapi.json',
-            servers: [{{ url: '{auth_base_url}' }}]
-          }}
-        ]
-      }});
-    </script>
-  </body>
-</html>"#
-    )
 }

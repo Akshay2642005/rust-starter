@@ -51,10 +51,8 @@ fn extract_session_token(request: &Request) -> Option<String> {
             let cookie = cookie.trim();
             if let Some(v) = cookie.strip_prefix("better-auth.session-token=") {
                 Some(v.to_string())
-            } else if let Some(v) = cookie.strip_prefix("session=") {
-                Some(v.to_string())
             } else {
-                None
+                cookie.strip_prefix("session=").map(|v| v.to_string())
             }
         })
 }
