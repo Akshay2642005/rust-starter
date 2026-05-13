@@ -1,7 +1,7 @@
 //! Security header middleware builders for HTTP responses.
 use axum::http::{
     HeaderValue,
-    header::{CACHE_CONTROL, HeaderName},
+    header::{CACHE_CONTROL, CONTENT_SECURITY_POLICY, HeaderName},
 };
 use tower_http::set_header::SetResponseHeaderLayer;
 
@@ -38,5 +38,29 @@ pub fn referrer_policy_layer() -> SetResponseHeaderLayer<HeaderValue> {
     SetResponseHeaderLayer::if_not_present(
         HeaderName::from_static("referrer-policy"),
         HeaderValue::from_static("no-referrer"),
+    )
+}
+
+/// Builds a Content-Security-Policy header layer.
+#[must_use]
+pub fn csp_layer() -> SetResponseHeaderLayer<HeaderValue> {
+    let csp = concat!(
+        "default-src 'none'; ",
+        "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; ",
+        "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; ",
+        "img-src 'self' data: https:; ",
+        "font-src 'self' https://cdn.jsdelivr.net https://fonts.scalar.com; ",
+        "connect-src 'self' https://cdn.jsdelivr.net http://localhost:* https://api.scalar.com; "
+    );
+
+    SetResponseHeaderLayer::if_not_present(CONTENT_SECURITY_POLICY, HeaderValue::from_static(csp))
+}
+
+/// Builds a Strict-Transport-Security header layer (1 year, includeSubDomains).
+#[must_use]
+pub fn hsts_layer() -> SetResponseHeaderLayer<HeaderValue> {
+    SetResponseHeaderLayer::if_not_present(
+        HeaderName::from_static("strict-transport-security"),
+        HeaderValue::from_static("max-age=31536000; includeSubDomains"),
     )
 }

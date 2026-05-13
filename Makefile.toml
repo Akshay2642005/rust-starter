@@ -5,7 +5,7 @@ default_to_workspace = false
 description = "Run backend app"
 command = "cargo"
 args = ["watch","-q","-c","-x","run -p api"]
-env = { APP_ENV = "production", RUST_LOG = "info,tower_http=trace" }
+env = { APP_ENV = "development", RUST_LOG = "info,tower_http=trace" }
 
 [tasks.client]
 description = "Run frontend placeholder"

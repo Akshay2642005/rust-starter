@@ -1,0 +1,45 @@
+primary:
+  env: production
+  name: rust-starter
+
+server:
+  host: 0.0.0.0
+  port: 8080
+  request_timeout_secs: 30
+  cors_allowed_origins: ["https://yourdomain.com"]
+  path_prefix: "/api/v1"
+
+telemetry:
+  service_name: rust-starter
+  environment: production
+  filter: info
+  format: json
+  ansi: false
+  include_file: false
+  include_line_number: false
+  otlp:
+    enabled: true
+    endpoint: "http://otel-collector:4317"
+
+auth:
+  # Set via APP__AUTH__SECRET env var — do not hardcode here.
+  secret: ""
+  base_url: "https://yourdomain.com"
+  path_prefix: "/auth"
+  enable_signup: false
+  password_min_length: 12
+  argon2:
+    memory_cost: 65536
+    time_cost: 3
+    parallelism: 4
+
+store:
+  # Set via APP__STORE__URL env var — do not hardcode here.
+  url: ""
+  max_connections: 20
+  min_connections: 2
+  connect_timeout_secs: 10
+  acquire_timeout_secs: 10
+  idle_timeout_secs: 300
+  max_lifetime_secs: 1800
+  sqlx_logging: false

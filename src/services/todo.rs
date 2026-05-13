@@ -62,6 +62,9 @@ pub async fn update_todo(
     id: uuid::Uuid,
     input: todo::UpdateTodo,
 ) -> Result<todo::Todo, AppError> {
+    if input.title.is_none() && input.done.is_none() {
+        return Err(AppError::bad_request("request body must include at least one field to update"));
+    }
     let repo = state.db.repository::<todos::Entity>();
 
     let mut active = repo

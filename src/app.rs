@@ -1,6 +1,13 @@
-use crate::{auth::BetterAuthService, middleware, openapi::{AppApiDoc, SystemApiDoc}, registry, state::AppState};
+use crate::{
+    auth::BetterAuthService,
+    middleware,
+    openapi::{AppApiDoc, SystemApiDoc},
+    registry,
+    state::AppState,
+};
 use anyhow::{Context, Result};
 use axum::{Router, routing::get};
+use axum_prometheus::PrometheusMetricLayer;
 use configuration::Config;
 use seaorm::SeaOrmStore;
 use std::{future::Future, net::SocketAddr, sync::Arc};
@@ -79,15 +86,26 @@ impl ServerBuilder {
 }
 
 fn build_router(state: AppState, cfg: &Config) -> Router {
+    let (prometheus_layer, metrics_handle) = PrometheusMetricLayer::pair();
+
     let auth_service = state.auth.router().into_service();
     let auth_path = registry::join_paths(&cfg.server.path_prefix, &cfg.auth.path_prefix);
+    let auth_rate_limit_cfg = middleware::auth_rate_limit_layer();
+    let global_rate_limit_cfg = middleware::global_rate_limit_layer();
+
+    let auth_router =
+        Router::new()
+            .fallback_service(auth_service)
+            .layer(middleware::GovernorLayer {
+                config: auth_rate_limit_cfg,
+            });
 
     let mut api_router = registry::install_routes(
         Router::<AppState>::new(),
         &cfg.server.path_prefix,
         state.clone(),
     )
-    .nest_service(&auth_path, auth_service)
+    .nest(&auth_path, auth_router)
     .with_state(state);
 
     // In non-development, block the better-auth OpenAPI reference endpoint.
@@ -99,8 +117,6 @@ fn build_router(state: AppState, cfg: &Config) -> Router {
         );
     }
 
-    // Docs routes are stateless — build separately and merge after state is applied.
-    // Only mounted in development; not available in production.
     let router = if cfg.primary.env == "development" {
         let docs_html = build_docs_html(cfg);
         let auth_openapi_url = format!(
@@ -122,7 +138,17 @@ fn build_router(state: AppState, cfg: &Config) -> Router {
     } else {
         api_router
     };
-    middleware::apply(router, cfg)
+
+    let metrics_router = Router::new().route(
+        "/metrics",
+        get(move || async move { metrics_handle.render() }),
+    );
+
+    middleware::apply(router.merge(metrics_router), cfg)
+        .layer(middleware::GovernorLayer {
+            config: global_rate_limit_cfg,
+        })
+        .layer(prometheus_layer)
 }
 
 async fn serve_merged_auth_spec(auth_openapi_url: String) -> axum::response::Response {
@@ -191,8 +217,8 @@ fn build_docs_html(cfg: &Config) -> String {
     use utoipa::OpenApi;
     let app_spec =
         serde_json::to_string(&AppApiDoc::openapi()).expect("failed to serialize App API spec");
-    let system_spec =
-        serde_json::to_string(&SystemApiDoc::openapi()).expect("failed to serialize System API spec");
+    let system_spec = serde_json::to_string(&SystemApiDoc::openapi())
+        .expect("failed to serialize System API spec");
 
     let auth_base_url = format!(
         "http://localhost:{}{}{}",

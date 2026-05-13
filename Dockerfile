@@ -65,5 +65,8 @@ COPY --from=build /bin/server /bin/
 # Expose the port that the application listens on.
 EXPOSE 8080
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://localhost:8080/health || exit 1
+
 # What the container should run when it is started.
 CMD ["/bin/server"]

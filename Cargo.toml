@@ -47,6 +47,13 @@ utoipa = { workspace = true }
 # HTTP client
 reqwest = { workspace = true }
 
+# Rate limiting
+tower_governor = { workspace = true }
+governor = { workspace = true }
+
+# Metrics
+axum-prometheus = { workspace = true }
+
 # Workspace Crates
 configuration = { workspace = true }
 seaorm = { workspace = true }
@@ -135,9 +142,21 @@ sea-orm-migration = { version = "1", features = [ "sqlx-postgres", "runtime-toki
 # HTTP Libraries
 axum = { version = "0.8", features = ["macros", "tracing", "multipart", "ws"] }
 tower = { version = "0.5", features = ["full"] }
-tower-http = { version = "0.6", features = ["cors", "compression-gzip", "timeout", "trace", "request-id", "sensitive-headers", "catch-panic", "set-header", "limit"] }
-tower_governor = { version = "0.4", features = ["axum"] }
-governor = "0.6"
+tower-http = { version = "0.6", features = [
+  "cors",
+  "compression-gzip",
+  "timeout",
+  "trace",
+  "request-id",
+  "sensitive-headers",
+  "catch-panic",
+  "set-header",
+  "limit"
+] }
+tower_governor = { version = "0.6", features = ["axum"] }
+governor = "0.8"
+
+axum-prometheus = { version = "0.7", default-features = false, features = ["prometheus"] }
 
 # HTTP Utilities and Validation
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
