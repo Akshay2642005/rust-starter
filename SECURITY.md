@@ -7,7 +7,7 @@ We take security seriously and appreciate responsible disclosure.
 If you discover a security issue, please report it privately:
 
 - **Email:** akshay2642005@gmail.com
-- **Subject:** `Security Issue: rust-tanstack-starter`
+- **Subject:** `Security Issue: rust-starter`
 
 Please include:
 - A clear description of the issue
@@ -30,7 +30,7 @@ We aim to follow this timeline:
 
 Security fixes are provided for:
 
-- The `main` branch
+- The `master` branch
 - The latest released version (if applicable)
 
 Older versions may not receive security patches.
