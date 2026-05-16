@@ -155,6 +155,7 @@ pub fn build_docs_html(cfg: &Config) -> String {
     <script>
       Scalar.createApiReference('#app', {{
         theme: 'default',
+        showDeveloperTools: 'never',
         sources: [
           {{ 
             title: 'App API', content: {app_spec},

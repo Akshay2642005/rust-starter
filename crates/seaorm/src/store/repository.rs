@@ -71,8 +71,6 @@ where
         }
     }
 
-    // ── Single-row writes ────────────────────────────────────────────────────
-
     /// Insert an active model and return the inserted model.
     pub async fn insert<A>(&self, active_model: A) -> OrmResult<E::Model>
     where
@@ -86,7 +84,11 @@ where
     }
 
     /// Insert inside an open transaction.
-    pub async fn insert_in_tx<A>(&self, tx: &DatabaseTransaction, active_model: A) -> OrmResult<E::Model>
+    pub async fn insert_in_tx<A>(
+        &self,
+        tx: &DatabaseTransaction,
+        active_model: A,
+    ) -> OrmResult<E::Model>
     where
         A: ActiveModelTrait<Entity = E> + Send,
         E::Model: IntoActiveModel<A>,
@@ -112,15 +114,16 @@ where
     }
 
     /// Update inside an open transaction.
-    pub async fn update_in_tx<A>(&self, tx: &DatabaseTransaction, active_model: A) -> OrmResult<E::Model>
+    pub async fn update_in_tx<A>(
+        &self,
+        tx: &DatabaseTransaction,
+        active_model: A,
+    ) -> OrmResult<E::Model>
     where
         A: ActiveModelTrait<Entity = E> + Send,
         E::Model: IntoActiveModel<A>,
     {
-        E::update(active_model)
-            .exec(tx)
-            .await
-            .map_err(map_db_err)
+        E::update(active_model).exec(tx).await.map_err(map_db_err)
     }
 
     /// Insert or update: tries to insert; on unique-key conflict, applies the
@@ -146,8 +149,6 @@ where
             .await
             .map_err(map_db_err)
     }
-
-    // ── Bulk writes ──────────────────────────────────────────────────────────
 
     /// Insert multiple rows in a single statement and return the inserted models.
     ///
@@ -184,8 +185,6 @@ where
             .await
             .map_err(map_db_err)
     }
-
-    // ── Reads ────────────────────────────────────────────────────────────────
 
     /// Return all rows (no filter, no pagination). Use with care on large tables.
     pub async fn get_all(&self) -> OrmResult<Vec<E::Model>> {
@@ -251,8 +250,6 @@ where
         Ok(Paginated::new(items, total, page))
     }
 
-    // ── Aggregates ───────────────────────────────────────────────────────────
-
     /// Return the total number of rows matching `condition`.
     ///
     /// ```rust,ignore
@@ -277,8 +274,6 @@ where
         self.count(condition).await.map(|n| n > 0)
     }
 
-    // ── Deletes ──────────────────────────────────────────────────────────────
-
     /// Delete by primary key; returns the number of affected rows.
     pub async fn delete_by_id<T>(&self, id: T) -> OrmResult<u64>
     where
@@ -296,10 +291,7 @@ where
     where
         T: Into<<E::PrimaryKey as PrimaryKeyTrait>::ValueType>,
     {
-        let result = E::delete_by_id(id)
-            .exec(tx)
-            .await
-            .map_err(map_db_err)?;
+        let result = E::delete_by_id(id).exec(tx).await.map_err(map_db_err)?;
         Ok(result.rows_affected)
     }
 
@@ -315,8 +307,6 @@ where
             .map_err(map_db_err)?;
         Ok(result.rows_affected)
     }
-
-    // ── Transaction helpers ──────────────────────────────────────────────────
 
     /// Execute `work` inside a single ACID transaction managed by this repository.
     ///
@@ -342,8 +332,6 @@ where
             }
         }
     }
-
-    // ── Escape hatch ─────────────────────────────────────────────────────────
 
     /// Borrow the underlying database connection for custom SeaORM queries.
     pub fn db(&self) -> &DatabaseConnection {

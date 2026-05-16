@@ -1,0 +1,45 @@
+---
+title: Getting Started
+description: Overview and quick start for Rust Starter
+---
+
+# Rust Starter
+
+Rust Starter is a production-ready Axum backend template that ships with authentication,
+SeaORM + Postgres, OpenAPI docs, and built-in observability.
+
+## What you get
+
+- Axum 0.8 web server with clean routing and middleware.
+- Better Auth for email/password, sessions, and account management.
+- SeaORM store with Postgres connectivity.
+- Hot-reloaded configuration from file + environment.
+- OpenAPI schemas with Scalar UI in development.
+- Prometheus metrics, health probes, and structured tracing.
+- Rate limiting, security headers, request IDs, and timeouts.
+
+## Quick start
+
+1. Copy `config.example.yml` to `config.yml` and update the values.
+2. Set `APP_ENV` and `CONFIG_DIR` if you keep configs outside the project root.
+3. Run the server with `cargo run`.
+
+## Project layout
+
+- `src/main.rs`: bootstraps config, telemetry, and the HTTP server.
+- `src/app.rs`: router, middleware, and runtime wiring.
+- `src/handlers`: HTTP handlers for system and todo APIs.
+- `crates/configuration`: config loading, validation, and hot reload.
+- `crates/seaorm`: database store and repository helpers.
+- `crates/telemetry`: tracing + OTLP export.
+
+## Core endpoints
+
+- `GET /health`, `GET /readyz`, `GET /status`: system probes.
+- `GET /todos` and `POST /todos`: todo APIs (protected).
+- Auth endpoints are mounted under your configured `auth.path_prefix`.
+
+## Next steps
+
+- Read the API reference at [/docs/reference/api-routes](/docs/reference/api-routes).
+- Browse the repository at [GitHub](https://github.com/Akshay2642005/rust-starter).
