@@ -19,7 +19,6 @@ export default function HomePage() {
       {/* --- HERO SECTION --- */}
       <section className="w-full pt-32 pb-20 px-6 text-center">
         <div className="max-w-5xl mx-auto">
-
           {/* Refined version badge matched with reference layout design */}
           <span className="inline-flex items-center gap-2 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-orange-600 bg-orange-50/60 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900/60 rounded mb-8">
             unreleased (coming soon)

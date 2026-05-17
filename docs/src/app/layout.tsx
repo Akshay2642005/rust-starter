@@ -11,6 +11,19 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
 
 export const metadata: Metadata = {
     metadataBase: new URL(siteUrl),
+    icons: {
+        icon: [
+            {
+                url: '/favicon.svg',
+                type: 'image/svg+xml',
+            },
+            {
+                url: '/icon.svg',
+                type: 'image/svg+xml',
+            },
+        ],
+        shortcut: '/favicon.svg',
+    },
 };
 
 export default function Layout({ children }: LayoutProps<'/'>) {

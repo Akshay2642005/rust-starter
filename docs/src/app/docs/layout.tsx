@@ -15,7 +15,15 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
                     <ThemeSwitch />
                 </div>
                 <div className="flex min-h-screen flex-col items-center justify-center text-center">
-                    <p className="text-sm uppercase tracking-[0.6em] text-white/80">Coming soon</p>
+                    <div className="relative mb-7 size-32 md:size-36">
+                        <div className="absolute inset-[-56px] rounded-full bg-white/10 blur-3xl" />
+                        <img
+                            src="/rust-starter-mark.svg"
+                            alt="Rust Starter"
+                            className="relative size-full"
+                        />
+                    </div>
+                    <p className="text-sm uppercase tracking-[0.55em] text-white/90">Coming soon</p>
                 </div>
             </main>
         );
