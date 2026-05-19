@@ -1,10 +1,10 @@
 {
-  "name": "create-rust-starter",
+  "name": "@akshay2642005/rust-starter",
   "version": "0.1.0",
   "description": "Create a production-ready Axum backend from the Rust Starter template.",
   "type": "module",
   "bin": {
-    "create-rust-starter": "./bin/create-rust-starter.js"
+    "@akshay2642005/rust-starter": "./bin/create-rust-starter.js"
   },
   "scripts": {
     "build": "tsup src/cli.ts --format esm --dts --clean",

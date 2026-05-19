@@ -7,9 +7,9 @@ import { fileURLToPath } from 'node:url';
 
 const execFileAsync = promisify(execFile);
 const packageRoot = path.resolve(fileURLToPath(import.meta.url), '..', '..');
-const binPath = path.join(packageRoot, 'bin', 'create-rust-starter.js');
+const binPath = path.join(packageRoot, 'bin', '@akshay2642005/rust-starter.js');
 
-const tempRoot = await mkdtemp(path.join(os.tmpdir(), 'create-rust-starter-'));
+const tempRoot = await mkdtemp(path.join(os.tmpdir(), '@akshay2642005/rust-starter-'));
 const projectName = 'my-api-smoke';
 const projectDir = path.join(tempRoot, projectName);
 

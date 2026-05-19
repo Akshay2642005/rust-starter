@@ -1,9 +1,9 @@
-# create-rust-starter
+# @akshay2642005/rust-starter
 
 Create a production-ready Axum backend from the Rust Starter template.
 
 ```bash
-npx create-rust-starter@latest my-api
+npx @akshay2642005/rust-starter@latest my-api
 cd my-api
 cp config.example.yml config.yml
 docker compose up -d
@@ -23,7 +23,7 @@ telemetry, Docker, and migration tooling.
 ## Usage
 
 ```bash
-npx create-rust-starter@latest [project-name]
+npx @akshay2642005/rust-starter@latest [project-name]
 ```
 
 If `project-name` is omitted, the CLI prompts for one.
