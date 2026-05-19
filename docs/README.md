@@ -1,12 +1,12 @@
 # Rust Starter Docs
 
 This is the documentation website for Rust Starter, a production-ready Axum
-backend starter published through the `create-rust-starter` npm CLI.
+backend starter published through the `@akshay2642005/rust-starter` npm CLI.
 
 The current CLI release is `0.1.0`:
 
 ```bash
-npx create-rust-starter@latest my-api
+npx @akshay2642005/rust-starter@latest my-api
 ```
 
 ## Local development

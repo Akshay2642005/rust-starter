@@ -1,37 +1,37 @@
 {
-  "name": "@akshay2642005/rust-starter",
-  "version": "0.1.0",
-  "description": "Create a production-ready Axum backend from the Rust Starter template.",
-  "type": "module",
-  "bin": {
-    "@akshay2642005/rust-starter": "./bin/create-rust-starter.js"
-  },
-  "scripts": {
-    "build": "tsup src/cli.ts --format esm --dts --clean",
-    "dev": "tsx src/cli.ts",
-    "prepack": "node scripts/bundle-template.js && npm run build",
-    "smoke": "npm run prepack && node scripts/smoke-test.js",
-    "typecheck": "tsc --noEmit"
-  },
-  "files": [
-    "bin",
-    "dist",
-    "templates"
-  ],
-  "dependencies": {
-    "@clack/prompts": "^0.8.2",
-    "commander": "^12.1.0",
-    "fs-extra": "^11.2.0"
-  },
-  "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.10.2",
-    "tsup": "^8.3.5",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "license": "MIT"
+    "name": "@akshay2642005/rust-starter",
+    "version": "0.1.0",
+    "description": "Create a production-ready Axum backend from the Rust Starter template.",
+    "type": "module",
+    "bin": {
+        "@akshay2642005/rust-starter": "./bin/@akshay2642005/rust-starter.js"
+    },
+    "scripts": {
+        "build": "tsup src/cli.ts --format esm --dts --clean",
+        "dev": "tsx src/cli.ts",
+        "prepack": "node scripts/bundle-template.js && npm run build",
+        "smoke": "npm run prepack && node scripts/smoke-test.js",
+        "typecheck": "tsc --noEmit"
+    },
+    "files": [
+        "bin",
+        "dist",
+        "templates"
+    ],
+    "dependencies": {
+        "@clack/prompts": "^0.8.2",
+        "commander": "^12.1.0",
+        "fs-extra": "^11.2.0"
+    },
+    "devDependencies": {
+        "@types/fs-extra": "^11.0.4",
+        "@types/node": "^22.10.2",
+        "tsup": "^8.3.5",
+        "tsx": "^4.19.2",
+        "typescript": "^5.7.2"
+    },
+    "engines": {
+        "node": ">=18"
+    },
+    "license": "MIT"
 }

@@ -8,12 +8,12 @@ production-ready Rust backend service from the default template.
 ### Install
 
 ```bash
-npx create-rust-starter@latest my-api
+npx @akshay2642005/rust-starter@latest my-api
 ```
 
 ### npm package
 
-- `create-rust-starter@0.1.0`
+- `@akshay2642005/rust-starter@0.1.0`
 
 ### Included stack
 
@@ -29,7 +29,7 @@ npx create-rust-starter@latest my-api
 ### Quick start
 
 ```bash
-npx create-rust-starter@latest my-api
+npx @akshay2642005/rust-starter@latest my-api
 cd my-api
 cp config.example.yml config.yml
 docker compose up -d

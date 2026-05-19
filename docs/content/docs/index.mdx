@@ -6,13 +6,13 @@ description: Install Rust Starter with the v0.1.0 npm CLI and run the generated 
 # Rust Starter
 
 Rust Starter is a production-ready Axum backend starter that now ships through
-the `create-rust-starter` npm CLI. Version `0.1.0` generates a complete Axum
+the `@akshay2642005/rust-starter` npm CLI. Version `0.1.0` generates a complete Axum
 service with authentication, SeaORM + Postgres, OpenAPI docs, migrations, and
 built-in observability.
 
 ## What you get
 
-- `npx create-rust-starter@latest` project generation.
+- `npx @akshay2642005/rust-starter@latest` project generation.
 - Axum 0.8 web server with clean routing and middleware.
 - Better Auth for email/password, sessions, and account management.
 - SeaORM store with Postgres connectivity.
@@ -26,7 +26,7 @@ built-in observability.
 Create a new service with the published CLI:
 
 ```bash
-npx create-rust-starter@latest my-api
+npx @akshay2642005/rust-starter@latest my-api
 cd my-api
 cp config.example.yml config.yml
 docker compose up -d
@@ -47,13 +47,13 @@ The generated server starts on `http://localhost:8080` by default.
 The v0.1.0 CLI accepts an optional project directory name:
 
 ```bash
-npx create-rust-starter@latest my-api
+npx @akshay2642005/rust-starter@latest my-api
 ```
 
 If no name is provided, the CLI prompts for one:
 
 ```bash
-npx create-rust-starter@latest
+npx @akshay2642005/rust-starter@latest
 ```
 
 Project names are normalized to lowercase kebab case. The generator also

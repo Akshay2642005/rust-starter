@@ -19,7 +19,7 @@ configuration hot reload, metrics, tracing, Docker, and migration tooling.
 The first generator flow is:
 
 ```bash
-npx create-rust-starter my-api
+npx @akshay2642005/rust-starter my-api
 cd my-api
 cp config.example.yml config.yml
 docker compose up -d
@@ -32,4 +32,3 @@ During local development of this repository, run the CLI directly:
 ```bash
 node packages/create-rust-starter/bin/create-rust-starter.js my-api
 ```
-
