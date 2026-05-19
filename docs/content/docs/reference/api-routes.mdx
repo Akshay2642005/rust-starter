@@ -1,8 +1,103 @@
 ---
-title: API Reference
-description: API routes and schemas
+title: CLI and API Reference
+description: create-rust-starter v0.1.0 commands, generated routes, and local development endpoints
 ---
 
-# API Reference
+# CLI and API Reference
 
-Coming soon.
+## CLI
+
+Rust Starter is published as the `create-rust-starter` npm package. Use it with
+`npx` to create a fresh backend service from the default template.
+
+```bash
+npx create-rust-starter@latest my-api
+```
+
+### Package
+
+- Name: `create-rust-starter`
+- Current release: `0.1.0`
+- Node.js: `>=18`
+- Binary: `create-rust-starter`
+
+### Arguments
+
+| Argument | Required | Description |
+| --- | --- | --- |
+| `project-name` | No | Directory name for the generated project. If omitted, the CLI prompts for it. |
+
+### Options
+
+| Option | Description |
+| --- | --- |
+| `--no-install` | Reserved for future dependency install support. The v0.1.0 CLI does not install dependencies. |
+| `-h`, `--help` | Print command help. |
+
+### Generated project setup
+
+After the CLI finishes, run:
+
+```bash
+cd my-api
+cp config.example.yml config.yml
+docker compose up -d
+cargo xtask migrate up
+cargo run
+```
+
+## Runtime endpoints
+
+The generated service defaults to `http://localhost:8080`.
+
+### System
+
+These routes are intended for health checks, local diagnostics, and metrics.
+
+| Method | Route | Description |
+| --- | --- | --- |
+| `GET` | `/health` | Basic health response. |
+| `GET` | `/healthz` | Health-check compatible alias. |
+| `GET` | `/livez` | Liveness probe. |
+| `GET` | `/readyz` | Readiness probe. |
+| `GET` | `/status` | Service status payload. |
+| `GET` | `/metrics` | Prometheus metrics. |
+
+### Todo API
+
+Todo routes are mounted under `server.path_prefix`, which defaults to
+`/api/v1`. They are protected by the generated auth middleware.
+
+| Method | Route | Description |
+| --- | --- | --- |
+| `POST` | `/api/v1/todos` | Create a todo. |
+| `GET` | `/api/v1/todos` | List todos. |
+| `GET` | `/api/v1/todos/{id}` | Fetch a todo by id. |
+| `PUT` | `/api/v1/todos/{id}` | Update a todo. |
+| `DELETE` | `/api/v1/todos/{id}` | Delete a todo. |
+
+### Auth API
+
+Better Auth routes are mounted under `server.path_prefix` plus
+`auth.path_prefix`. The default base path is:
+
+```text
+/api/v1/auth
+```
+
+Use the generated config to customize auth settings, session behavior, and
+trusted origins.
+
+## OpenAPI
+
+In development, the generated service exposes Scalar UI at:
+
+```text
+http://localhost:8080/docs
+```
+
+The auth OpenAPI document is available at:
+
+```text
+http://localhost:8080/docs/auth-openapi.json
+```

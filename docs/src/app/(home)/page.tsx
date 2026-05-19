@@ -5,7 +5,10 @@ import { gitConfig } from '@/lib/shared';
 export default function HomePage() {
   const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
 
+
+
   return (
+
     /* FIXED BACKGROUND OPACITIES:
       - Light mode changed from 0.06 (6%) to rgba(0,0,0,0.15) (15%) for clear visibility.
       - Dark mode changed from 0.06 (6%) to rgba(255,255,255,0.18) (18%) to make it crisp on deep backgrounds.
@@ -21,7 +24,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto">
           {/* Refined version badge matched with reference layout design */}
           <span className="inline-flex items-center gap-2 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-orange-600 bg-orange-50/60 dark:bg-orange-950/30 border border-orange-100 dark:border-orange-900/60 rounded mb-8">
-            unreleased (coming soon)
+            v0.1.0
           </span>
 
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 leading-[1.15]">
@@ -29,8 +32,12 @@ export default function HomePage() {
           </h1>
 
           <p className="text-lg md:text-xl text-fd-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            Axum, Better Auth, SeaORM, and Built-in Observability. Skip the boilerplate and focus on your business logic.
+            Create a production-ready Axum backend in seconds with the published v0.1.0 npx CLI.
           </p>
+
+          <div className="mx-auto mb-8 flex max-w-fit items-center rounded-lg border border-fd-border bg-fd-card px-4 py-3 font-mono text-sm text-fd-foreground shadow-sm">
+            npx create-rust-starter@latest my-api
+          </div>
 
           <div className="flex justify-center gap-4">
             <Link href="/docs" className="bg-orange-600 text-white px-6 py-2.5 rounded-lg font-semibold text-sm shadow-sm hover:bg-orange-700 transition">
@@ -46,9 +53,9 @@ export default function HomePage() {
               Github
             </Link>
           </div>
-
         </div>
       </section>
+
 
       {/* --- 3-COLUMN BRIEF FEATURES --- */}
       <section className="w-full px-6 py-12">

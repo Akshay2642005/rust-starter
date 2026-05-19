@@ -1,45 +1,42 @@
-# .
+# Rust Starter Docs
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+This is the documentation website for Rust Starter, a production-ready Axum
+backend starter published through the `create-rust-starter` npm CLI.
 
-Run development server:
+The current CLI release is `0.1.0`:
+
+```bash
+npx create-rust-starter@latest my-api
+```
+
+## Local development
+
+Run the docs development server:
 
 ```bash
 npm run dev
-# or
-pnpm dev
-# or
-yarn dev
 ```
 
 Open http://localhost:3000 with your browser to see the result.
 
-## Explore
+## Content
 
-In the project, you can see:
+Main docs content lives in `content/docs`:
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
-- `lib/layout.shared.tsx`: Shared options for layouts, optional but preferred to keep.
+- `content/docs/index.mdx`: getting started guide.
+- `content/docs/reference/api-routes.mdx`: CLI and generated API reference.
 
-| Route                     | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `app/(home)`              | The route group for your landing page and other pages. |
-| `app/docs`                | The documentation layout and pages.                    |
-| `app/api/search/route.ts` | The Route Handler for search.                          |
+Useful app files:
 
-### Fumadocs MDX
+- `src/app/(home)/page.tsx`: landing page.
+- `src/app/docs`: documentation layout and pages.
+- `src/app/api/search/route.ts`: search route handler.
+- `src/lib/source.ts`: Fumadocs content source adapter.
+- `src/lib/layout.shared.tsx`: shared layout options.
 
-A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
+## Checks
 
-Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
-
-## Learn More
-
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.dev) - learn about Fumadocs
+```bash
+npm run types:check
+npm run lint
+```

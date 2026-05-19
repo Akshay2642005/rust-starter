@@ -1,15 +1,18 @@
 ---
 title: Getting Started
-description: Overview and quick start for Rust Starter
+description: Install Rust Starter with the v0.1.0 npm CLI and run the generated service
 ---
 
 # Rust Starter
 
-Rust Starter is a production-ready Axum backend template that ships with authentication,
-SeaORM + Postgres, OpenAPI docs, and built-in observability.
+Rust Starter is a production-ready Axum backend starter that now ships through
+the `create-rust-starter` npm CLI. Version `0.1.0` generates a complete Axum
+service with authentication, SeaORM + Postgres, OpenAPI docs, migrations, and
+built-in observability.
 
 ## What you get
 
+- `npx create-rust-starter@latest` project generation.
 - Axum 0.8 web server with clean routing and middleware.
 - Better Auth for email/password, sessions, and account management.
 - SeaORM store with Postgres connectivity.
@@ -20,18 +23,51 @@ SeaORM + Postgres, OpenAPI docs, and built-in observability.
 
 ## Quick start
 
-1. Copy `config.example.yml` to `config.yml` and update the values.
-2. Set `APP_ENV` and `CONFIG_DIR` if you keep configs outside the project root.
-3. Run the server with `cargo run`.
+Create a new service with the published CLI:
+
+```bash
+npx create-rust-starter@latest my-api
+cd my-api
+cp config.example.yml config.yml
+docker compose up -d
+cargo xtask migrate up
+cargo run
+```
+
+The generated server starts on `http://localhost:8080` by default.
+
+## Requirements
+
+- Node.js 18 or newer for the CLI.
+- A Rust toolchain that supports edition 2024.
+- PostgreSQL, or Docker + Docker Compose for the bundled local database.
+
+## CLI usage
+
+The v0.1.0 CLI accepts an optional project directory name:
+
+```bash
+npx create-rust-starter@latest my-api
+```
+
+If no name is provided, the CLI prompts for one:
+
+```bash
+npx create-rust-starter@latest
+```
+
+Project names are normalized to lowercase kebab case. The generator also
+creates a fresh `auth.secret` value for the new project.
 
 ## Project layout
 
-- `src/main.rs`: bootstraps config, telemetry, and the HTTP server.
-- `src/app.rs`: router, middleware, and runtime wiring.
-- `src/handlers`: HTTP handlers for system and todo APIs.
-- `crates/configuration`: config loading, validation, and hot reload.
-- `crates/seaorm`: database store and repository helpers.
-- `crates/telemetry`: tracing + OTLP export.
+- `src/main.rs`: bootstraps configuration, telemetry, and the HTTP server.
+- `src/app.rs`: wires the router, middleware, and server runtime.
+- `src/handlers`: contains system, auth-adjacent, and todo HTTP handlers.
+- `crates/configuration`: loads, validates, and hot-reloads config.
+- `crates/seaorm`: provides database entities, store setup, and repository helpers.
+- `crates/telemetry`: configures tracing, metrics, and optional OTLP export.
+- `tooling/xtask`: runs migrations, checks, benches, and entity generation.
 
 ## Core endpoints
 
@@ -41,5 +77,5 @@ SeaORM + Postgres, OpenAPI docs, and built-in observability.
 
 ## Next steps
 
-- Read the API reference at [/docs/reference/api-routes](/docs/reference/api-routes).
+- Read the CLI reference at [/docs/reference/api-routes](/docs/reference/api-routes).
 - Browse the repository at [GitHub](https://github.com/Akshay2642005/rust-starter).
