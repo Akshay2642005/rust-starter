@@ -10,6 +10,7 @@
     "build": "tsup src/cli.ts --format esm --dts --clean",
     "dev": "tsx src/cli.ts",
     "prepack": "node scripts/bundle-template.js && npm run build",
+    "smoke": "npm run prepack && node scripts/smoke-test.js",
     "typecheck": "tsc --noEmit"
   },
   "files": [
